@@ -6,13 +6,85 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/blurred_background"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".WelcomeActivity"
     tools:showIn="@layout/activity_welcome">
+
+    <LinearLayout
+        android:id="@+id/time_setting"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@color/bright_grey"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:textSize="20sp"
+            android:text="@string/settings_text"/>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/one"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/two"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/three"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/four"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/five"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/six"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/seven"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/eight"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/nine"/>
+
+            <TextView
+                style="@style/minutes"
+                android:text="@string/ten"/>
+
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/time_settings_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:progress="2"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:max="9" />
+
+    </LinearLayout>
 
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/gif_image"
@@ -33,6 +105,9 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="50dp">
 
         <SeekBar
