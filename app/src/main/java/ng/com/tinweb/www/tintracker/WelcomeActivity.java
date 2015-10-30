@@ -9,7 +9,10 @@ import android.transition.TransitionManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -23,6 +26,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private boolean buttonUp = false;
     private Button action_button;
     private GifDrawable gifFromResource;
+    private RelativeLayout container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +35,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setupActionButton();
+        container = (RelativeLayout) findViewById(R.id.container);
 
+        setupActionButton();
     }
 
     private void setupActionButton() {
@@ -64,7 +69,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
-                Toast.makeText(this, "Settings Action", Toast.LENGTH_LONG).show();
+                showTimeSetting();
                 break;
             case R.id.action_history:
                 showHistoryPopUp();
@@ -72,6 +77,23 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showTimeSetting() {
+        LinearLayout timeSetting = (LinearLayout) findViewById(R.id.time_setting);
+        int visibility = timeSetting.getVisibility();
+
+        Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.abc_fade_in);
+        Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.abc_fade_out);
+
+        if (visibility == View.GONE) {
+            timeSetting.setVisibility(View.VISIBLE);
+            timeSetting.startAnimation(fadeIn);
+        }
+        else {
+            timeSetting.startAnimation(fadeOut);
+            timeSetting.setVisibility(View.GONE);
+        }
     }
 
     private void showHistoryPopUp() {
@@ -116,7 +138,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private void setTransitionAnimation(boolean buttonUp, RelativeLayout.LayoutParams params) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            RelativeLayout container = (RelativeLayout) findViewById(R.id.container);
             TransitionManager.beginDelayedTransition(container);
             action_button.setLayoutParams(params);
         }
