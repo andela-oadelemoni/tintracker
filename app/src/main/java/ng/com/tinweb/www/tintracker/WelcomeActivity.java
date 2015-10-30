@@ -3,6 +3,7 @@ package ng.com.tinweb.www.tintracker;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionManager;
 import android.view.Menu;
@@ -17,7 +18,7 @@ import java.io.IOException;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener {
+public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     private boolean buttonUp = false;
     private Button action_button;
@@ -66,11 +67,20 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 Toast.makeText(this, "Settings Action", Toast.LENGTH_LONG).show();
                 break;
             case R.id.action_history:
-                Toast.makeText(this, "History Action", Toast.LENGTH_LONG).show();
+                showHistoryPopUp();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showHistoryPopUp() {
+        View view = findViewById(R.id.action_history);
+
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.history);
+        popupMenu.show();
     }
 
     @Override
@@ -118,5 +128,20 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             action_button.animate().translationY(transitionDistance).setDuration(500);
         }
 
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+
+        switch(id) {
+            case R.id.by_date:
+                Toast.makeText(this, "Date Option Picked", Toast.LENGTH_LONG).show();
+                break;
+            case R.id.by_location:
+                Toast.makeText(this, "Location Option Picked", Toast.LENGTH_LONG).show();
+                break;
+        }
+        return false;
     }
 }

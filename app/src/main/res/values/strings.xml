@@ -7,4 +7,6 @@
     <string name="stop_tracking">Stop Tracking</string>
     <string name="default_tracking_time">5:00</string>
     <string name="tracking_start_time">0:00</string>
+    <string name="by_location">History by location</string>
+    <string name="by_date">History by date</string>
 </resources>
