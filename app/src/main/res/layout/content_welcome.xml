@@ -11,13 +11,16 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".WelcomeActivity"
+    android:background="@drawable/blurred_background"
     tools:showIn="@layout/activity_welcome">
-<!--
-    <ImageView
+
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/gif_image"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/funny_guy_walking"/>-->
+        />
 
     <Button
         android:animateLayoutChanges="true"
