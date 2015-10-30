@@ -8,18 +8,20 @@ import android.transition.TransitionManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import java.io.IOException;
+
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
+
 public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Animation moveUpAnimation;
-    private Animation moveDownAnimation;
     private boolean buttonUp = false;
     private Button action_button;
+    private GifDrawable gifFromResource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,17 +32,20 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         setupActionButton();
 
-        setupAnimation();
-    }
-
-    private void setupAnimation() {
-        moveUpAnimation = AnimationUtils.loadAnimation(this, R.anim.abc_slide_out_top);
-        moveDownAnimation = AnimationUtils.loadAnimation(this, R.anim.abc_slide_in_top);
     }
 
     private void setupActionButton() {
         action_button = (Button) findViewById(R.id.action_button);
         action_button.setOnClickListener(this);
+
+        try {
+            gifFromResource = new GifDrawable( getResources(), R.drawable.walking );
+            GifImageView image = (GifImageView) findViewById(R.id.gif_image);
+            image.setImageDrawable(gifFromResource);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        gifFromResource.stop();
     }
 
     @Override
@@ -86,11 +91,13 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
             buttonUp = false;
+            gifFromResource.stop();
         } else {
             params.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             params.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
             buttonUp = true;
+            gifFromResource.start();
         }
         setTransitionAnimation(buttonUp, params);
 
