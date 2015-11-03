@@ -25,18 +25,25 @@ import pl.droidsonroids.gif.GifImageView;
 
 public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
+    // Layout container
+    private RelativeLayout container;
+
+    // Button
     private boolean buttonUp = false;
     private Button action_button;
     private RelativeLayout.LayoutParams actionButtonParams;
-    private GifDrawable gifFromResource;
-    private RelativeLayout container;
-    private GifImageView gifImage;
+
+    //  Tracker Settings
+    private SeekBar seekBarTimeSetting;
+    private SeekBar timeBar;
     private int timeSetting;
     private int seekbarSteps;
     private TrackerTimeSetting trackerTimeSetting;
     private TextView timeLimit;
-    private SeekBar seekBarTimeSetting;
-    private SeekBar timeBar;
+
+    // Gif Image
+    private GifDrawable gifFromResource;
+    private GifImageView gifImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
