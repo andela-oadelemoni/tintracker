@@ -6,7 +6,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import ng.com.tinweb.www.tintracker.activities.WelcomeActivity;
 import ng.com.tinweb.www.tintracker.appConfig.ContextProvider;
 
 /**
@@ -16,11 +15,8 @@ public class TinTrackerSensor implements SensorEventListener {
 
     private Context context = ContextProvider.getContext();
     private SensorManager sensorManager;
-    private WelcomeActivity activity;
 
-    public TinTrackerSensor(WelcomeActivity activity) {
-        this.activity = activity;
-    }
+    public TinTrackerSensor() {}
 
     public Sensor getSensor() {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -32,19 +28,12 @@ public class TinTrackerSensor implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        activity.sensorIsh(event);
+        // TODO something
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        // TODO something
     }
 
-    public void sensorEventGetter(SensorChangeCallback callback) {
-        callback.onChange();
-    }
-
-    public interface SensorChangeCallback {
-        void onChange();
-    }
 }
