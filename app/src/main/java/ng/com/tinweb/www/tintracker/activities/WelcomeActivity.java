@@ -1,11 +1,15 @@
-package ng.com.tinweb.www.tintracker;
+package ng.com.tinweb.www.tintracker.activities;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,19 +18,28 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 
+import ng.com.tinweb.www.tintracker.R;
+import ng.com.tinweb.www.tintracker.sensor.TinTrackerSensor;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private boolean buttonUp = false;
     private Button action_button;
     private GifDrawable gifFromResource;
     private RelativeLayout container;
+    private GifImageView gifImage;
+    private GoogleApiClient googleClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +51,26 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         container = (RelativeLayout) findViewById(R.id.container);
 
         setupActionButton();
+        setupGifImage();
+
+        buildGoogleApiClient();
+
+    }
+
+    private void setupGifImage() {
+        gifImage = (GifImageView) findViewById(R.id.gif_image);
+        try {
+            gifFromResource = new GifDrawable( getResources(), R.drawable.walking );
+            gifImage.setImageDrawable(gifFromResource);
+            gifFromResource.stop();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupActionButton() {
         action_button = (Button) findViewById(R.id.action_button);
         action_button.setOnClickListener(this);
-
-        try {
-            gifFromResource = new GifDrawable( getResources(), R.drawable.walking );
-            GifImageView image = (GifImageView) findViewById(R.id.gif_image);
-            image.setImageDrawable(gifFromResource);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        gifFromResource.stop();
     }
 
     @Override
@@ -124,31 +143,46 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             action_button.setText(R.string.start_tracking);
             buttonUp = false;
             gifFromResource.stop();
+            switchGifAnimation();
         } else {
             params.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             params.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
+            switchGifAnimation();
             buttonUp = true;
-            gifFromResource.start();
         }
-        setTransitionAnimation(buttonUp, params);
+        setTransitionAnimation(params);
 
     }
 
-    private void setTransitionAnimation(boolean buttonUp, RelativeLayout.LayoutParams params) {
+    private void switchGifAnimation() {
+        int visibility = gifImage.getVisibility();
+        Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.abc_fade_in);
+        Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.abc_fade_out);
+
+        if (visibility == View.GONE) {
+            gifImage.setVisibility(View.VISIBLE);
+            gifImage.startAnimation(fadeIn);
+        }
+        else {
+            gifImage.startAnimation(fadeOut);
+            gifImage.setVisibility(View.GONE);
+        }
+    }
+
+    private void setTransitionAnimation(RelativeLayout.LayoutParams params) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             TransitionManager.beginDelayedTransition(container);
             action_button.setLayoutParams(params);
         }
-        else {
-            float transitionDistance;
-            if (buttonUp) transitionDistance = (float) -400.0;
-            else transitionDistance = (float) 0.0;
+    }
 
-            action_button.animate().translationY(transitionDistance).setDuration(500);
+    public void sensorIsh(SensorEvent event) {
+        TextView textView = (TextView) findViewById(R.id.time_limit);
+        if (event.values[0] > 4) {
+            textView.setText(String.valueOf(event.values[0]));
         }
-
     }
 
     @Override
@@ -157,12 +191,46 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         switch(id) {
             case R.id.by_date:
-                Toast.makeText(this, "Date Option Picked", Toast.LENGTH_LONG).show();
+                TinTrackerSensor sensor = new TinTrackerSensor(this);
+                Sensor speedCheck = sensor.getSensor();
+                Toast.makeText(this, "Sensor name: "+speedCheck.getName()+". Sensor vendor: "+speedCheck.getVendor(), Toast.LENGTH_LONG).show();
                 break;
             case R.id.by_location:
                 Toast.makeText(this, "Location Option Picked", Toast.LENGTH_LONG).show();
                 break;
         }
         return false;
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        TextView text = (TextView) findViewById(R.id.time_limit);
+        Location location = LocationServices.FusedLocationApi.getLastLocation(
+                googleClient);
+        if (location != null) {
+            Log.i("Location", "Location is so not null");
+            text.setText("Lat: "+location.getLatitude());
+            Toast.makeText(this, "Lat: "+location.getLatitude()+"\nLong: "+location.getLongitude(), Toast.LENGTH_LONG).show();
+        }
+        else Log.i("Location", "Location is null");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        googleClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        googleClient.connect();
     }
 }
