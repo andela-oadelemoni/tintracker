@@ -1,20 +1,12 @@
 package ng.com.tinweb.www.tintracker.activities;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
-import android.transition.TransitionManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,31 +14,29 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-
 import java.io.IOException;
 
 import ng.com.tinweb.www.tintracker.R;
+import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
-import ng.com.tinweb.www.tintracker.sensor.TinTrackerSensor;
+import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     private boolean buttonUp = false;
     private Button action_button;
+    private RelativeLayout.LayoutParams actionButtonParams;
     private GifDrawable gifFromResource;
     private RelativeLayout container;
     private GifImageView gifImage;
-    private GoogleApiClient googleClient;
     private int timeSetting;
     private int seekbarSteps;
-    private TrackerTimeSetting pref;
+    private TrackerTimeSetting trackerTimeSetting;
     private TextView timeLimit;
-    private SeekBar setting;
+    private SeekBar seekBarTimeSetting;
+    private SeekBar timeBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,37 +45,37 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        container = (RelativeLayout) findViewById(R.id.container);
+        trackerTimeSetting = new TrackerTimeSetting(this);
 
-        timeLimit = (TextView) findViewById(R.id.time_limit);
-
-        setupActionButton();
+        setupViewProperties();
         setupGifImage();
-
-        buildGoogleApiClient();
-
-
-        timeBarSetting();
-
-        pref = new TrackerTimeSetting(this);
-
+        setupSettingBar();
         setUpTrackingTime();
+
+        new LocationHelper();
+
     }
 
-    private void setUpTrackingTime() {
-        SeekBar timeBar = (SeekBar) findViewById(R.id.timebar);
-        int timeSetting = pref.getTimeSetting();
-        seekbarSteps = timeSetting * 60;
-        setting.setProgress(timeSetting - 1);
-        timeBar.setMax(seekbarSteps);
-        timeBar.setProgress(0);
-        Log.i("TimeSetting", timeSetting+"");
-        String display = timeSetting+":00";
-        timeLimit.setText(display);
+    private void setupViewProperties() {
+
+        // View Group
+        container = (RelativeLayout) findViewById(R.id.container);
+        gifImage = (GifImageView) findViewById(R.id.gif_image);
+
+        // TextView
+        timeLimit = (TextView) findViewById(R.id.time_limit);
+
+        // SeekBar
+        seekBarTimeSetting = (SeekBar) findViewById(R.id.time_settings_bar);
+        timeBar = (SeekBar) findViewById(R.id.timebar);
+
+        // Button
+        action_button = (Button) findViewById(R.id.action_button);
+        actionButtonParams = (RelativeLayout.LayoutParams) action_button.getLayoutParams();
+        action_button.setOnClickListener(this);
     }
 
     private void setupGifImage() {
-        gifImage = (GifImageView) findViewById(R.id.gif_image);
         try {
             gifFromResource = new GifDrawable( getResources(), R.drawable.walking );
             gifImage.setImageDrawable(gifFromResource);
@@ -95,9 +85,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void setupActionButton() {
-        action_button = (Button) findViewById(R.id.action_button);
-        action_button.setOnClickListener(this);
+    private void setUpTrackingTime() {
+        int timeSetting = trackerTimeSetting.getTimeSetting();
+        seekbarSteps = timeSetting * 60;
+        seekBarTimeSetting.setProgress(timeSetting - 1);
+        timeBar.setMax(seekbarSteps);
+        timeBar.setProgress(0);
+        String display = timeSetting+":00";
+        timeLimit.setText(display);
     }
 
     @Override
@@ -115,7 +110,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
-                showTimeSetting();
+                LinearLayout timeSetting = (LinearLayout) findViewById(R.id.time_setting);
+                AppViewAnimation.toggleViewAnimation(timeSetting);
                 break;
             case R.id.action_history:
                 showHistoryPopUp();
@@ -125,46 +121,28 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         return super.onOptionsItemSelected(item);
     }
 
-    private void showTimeSetting() {
-        LinearLayout timeSetting = (LinearLayout) findViewById(R.id.time_setting);
-        int visibility = timeSetting.getVisibility();
-
-        Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.abc_fade_in);
-        Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.abc_fade_out);
-
-        if (visibility == View.GONE) {
-            timeSetting.setVisibility(View.VISIBLE);
-            timeSetting.startAnimation(fadeIn);
-        }
-        else {
-            timeSetting.startAnimation(fadeOut);
-            timeSetting.setVisibility(View.GONE);
-        }
-    }
-
-    private void timeBarSetting() {
-        setting = (SeekBar) findViewById(R.id.time_settings_bar);
-        setting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+    private void setupSettingBar() {
+        seekBarTimeSetting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 timeSetting = progress;
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                timeSetting = timeSetting + 1;
-                Toast.makeText(WelcomeActivity.this, "Tracking time changed to: "+timeSetting+" minute(s)", Toast.LENGTH_LONG).show();
+                if (timeSetting < 10) timeSetting = timeSetting + 1;
                 updateTimeSetting(timeSetting);
             }
         });
     }
 
     private void updateTimeSetting(int time) {
-        pref.saveTimeSetting(time);
-        Log.i("TimeToSave", time+"");
+        trackerTimeSetting.saveTimeSetting(time);
+        Toast.makeText(WelcomeActivity.this, "Tracking time changed to: " + timeSetting + " minute(s)", Toast.LENGTH_LONG).show();
         setUpTrackingTime();
     }
 
@@ -183,65 +161,27 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         switch (id) {
             case R.id.action_button:
-                textSharedPreference();
-                switchButtonAnimation();
+                trackingButtonAction();
                 break;
         }
     }
 
-    private void textSharedPreference() {
-        int shared = pref.getTimeSetting();
-        Toast.makeText(this, "Time Setting: "+shared, Toast.LENGTH_LONG).show();
-    }
+    private void trackingButtonAction() {
 
-    private void switchButtonAnimation() {
-
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) action_button.getLayoutParams();
         if (buttonUp) {
-            params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+            actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
-            buttonUp = false;
             gifFromResource.stop();
-            switchGifAnimation();
         } else {
-            params.addRule(RelativeLayout.CENTER_VERTICAL, 0);
-            params.setMargins(0, 50, 0, 0);
+            actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
+            actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
-            switchGifAnimation();
-            buttonUp = true;
         }
-        setTransitionAnimation(params);
 
-    }
+        buttonUp = !buttonUp;
+        AppViewAnimation.toggleViewAnimation(gifImage);
+        AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
 
-    private void switchGifAnimation() {
-        int visibility = gifImage.getVisibility();
-        Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.abc_fade_in);
-        Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.abc_fade_out);
-
-        if (visibility == View.GONE) {
-            gifImage.setVisibility(View.VISIBLE);
-            gifImage.startAnimation(fadeIn);
-        }
-        else {
-            gifImage.startAnimation(fadeOut);
-            gifImage.setVisibility(View.GONE);
-        }
-    }
-
-    private void setTransitionAnimation(RelativeLayout.LayoutParams params) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            TransitionManager.beginDelayedTransition(container);
-            action_button.setLayoutParams(params);
-        }
-    }
-
-    public void sensorIsh(SensorEvent event) {
-        TextView textView = (TextView) findViewById(R.id.time_limit);
-        if (event.values[0] > 4) {
-            textView.setText(String.valueOf(event.values[0]));
-        }
     }
 
     @Override
@@ -250,9 +190,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         switch(id) {
             case R.id.by_date:
-                TinTrackerSensor sensor = new TinTrackerSensor(this);
-                Sensor speedCheck = sensor.getSensor();
-                Toast.makeText(this, "Sensor name: "+speedCheck.getName()+". Sensor vendor: "+speedCheck.getVendor(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Google API does all this shit ", Toast.LENGTH_LONG).show();
                 break;
             case R.id.by_location:
                 Toast.makeText(this, "Location Option Picked", Toast.LENGTH_LONG).show();
@@ -261,31 +199,4 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         return false;
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        Location location = LocationServices.FusedLocationApi.getLastLocation(
-                googleClient);
-        if (location != null) {
-            Toast.makeText(this, "Lat: "+location.getLatitude()+"\nLong: "+location.getLongitude(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        googleClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        googleClient.connect();
-    }
 }
