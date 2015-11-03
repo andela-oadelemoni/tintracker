@@ -18,6 +18,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import com.google.android.gms.location.LocationServices;
 import java.io.IOException;
 
 import ng.com.tinweb.www.tintracker.R;
+import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.sensor.TinTrackerSensor;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
@@ -40,6 +42,11 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private RelativeLayout container;
     private GifImageView gifImage;
     private GoogleApiClient googleClient;
+    private int timeSetting;
+    private int seekbarSteps;
+    private TrackerTimeSetting pref;
+    private TextView timeLimit;
+    private SeekBar setting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +57,31 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         container = (RelativeLayout) findViewById(R.id.container);
 
+        timeLimit = (TextView) findViewById(R.id.time_limit);
+
         setupActionButton();
         setupGifImage();
 
         buildGoogleApiClient();
 
+
+        timeBarSetting();
+
+        pref = new TrackerTimeSetting(this);
+
+        setUpTrackingTime();
+    }
+
+    private void setUpTrackingTime() {
+        SeekBar timeBar = (SeekBar) findViewById(R.id.timebar);
+        int timeSetting = pref.getTimeSetting();
+        seekbarSteps = timeSetting * 60;
+        setting.setProgress(timeSetting - 1);
+        timeBar.setMax(seekbarSteps);
+        timeBar.setProgress(0);
+        Log.i("TimeSetting", timeSetting+"");
+        String display = timeSetting+":00";
+        timeLimit.setText(display);
     }
 
     private void setupGifImage() {
@@ -115,6 +142,32 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    private void timeBarSetting() {
+        setting = (SeekBar) findViewById(R.id.time_settings_bar);
+        setting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                timeSetting = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                timeSetting = timeSetting + 1;
+                Toast.makeText(WelcomeActivity.this, "Tracking time changed to: "+timeSetting+" minute(s)", Toast.LENGTH_LONG).show();
+                updateTimeSetting(timeSetting);
+            }
+        });
+    }
+
+    private void updateTimeSetting(int time) {
+        pref.saveTimeSetting(time);
+        Log.i("TimeToSave", time+"");
+        setUpTrackingTime();
+    }
+
     private void showHistoryPopUp() {
         View view = findViewById(R.id.action_history);
 
@@ -130,9 +183,15 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         switch (id) {
             case R.id.action_button:
+                textSharedPreference();
                 switchButtonAnimation();
                 break;
         }
+    }
+
+    private void textSharedPreference() {
+        int shared = pref.getTimeSetting();
+        Toast.makeText(this, "Time Setting: "+shared, Toast.LENGTH_LONG).show();
     }
 
     private void switchButtonAnimation() {
@@ -204,15 +263,11 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onConnected(Bundle bundle) {
-        TextView text = (TextView) findViewById(R.id.time_limit);
         Location location = LocationServices.FusedLocationApi.getLastLocation(
                 googleClient);
         if (location != null) {
-            Log.i("Location", "Location is so not null");
-            text.setText("Lat: "+location.getLatitude());
             Toast.makeText(this, "Lat: "+location.getLatitude()+"\nLong: "+location.getLongitude(), Toast.LENGTH_LONG).show();
         }
-        else Log.i("Location", "Location is null");
     }
 
     @Override
