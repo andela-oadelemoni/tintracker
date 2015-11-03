@@ -1,9 +1,11 @@
-package ng.com.tinweb.www.tintracker;
+package ng.com.tinweb.www.tintracker.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+
+import ng.com.tinweb.www.tintracker.R;
 
 public class LauncherActivity extends AppCompatActivity {
 
