@@ -1,5 +1,6 @@
 package ng.com.tinweb.www.tintracker.activities;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -45,6 +46,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private GifDrawable gifFromResource;
     private GifImageView gifImage;
 
+    // Location object
+    private LocationHelper locationHelper;
+    private Location location;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +64,13 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setupSettingBar();
         setUpTrackingTime();
 
-        new LocationHelper();
+        setupLocationHelper();
 
+
+    }
+
+    private void setupLocationHelper() {
+        locationHelper = new LocationHelper();
     }
 
     private void setupViewProperties() {
@@ -179,10 +189,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
+            locationHelper.stopLocationUpdates();
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
+            locationHelper.startLocationUpdates();
         }
 
         buttonUp = !buttonUp;
