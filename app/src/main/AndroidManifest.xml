@@ -28,6 +28,10 @@
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
+
+        <service
+            android:name=".data.AddressLookup"
+            android:exported="false"/>
     </application>
 
 </manifest>
