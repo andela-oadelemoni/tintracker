@@ -34,6 +34,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     // Layout container
     private RelativeLayout container;
+    private BroadcastReceiver receiver;
 
     // Button
     private boolean buttonUp = false;
@@ -76,8 +77,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         setupLocationHelper();
 
-        setupActivityRecognition();
-
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
 
     }
@@ -85,7 +84,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private void setupActivityRecognition() {
 
         //Broadcast receiver
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //Add current time
@@ -104,6 +103,11 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         registerReceiver(receiver, filter);
 
         new TinTrackerActivityRecognition();
+    }
+
+    private void disAbleActivityRecognition() {
+        //Filter the Intent and register broadcast receiver
+        unregisterReceiver(receiver);
     }
 
     private void setActivityRecognitionAction(String activity, int confidence) {
@@ -266,12 +270,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
             //locationHelper.stopLocationUpdates();
+            disAbleActivityRecognition();
 
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
             //locationHelper.startLocationUpdates();
+            setupActivityRecognition();
         }
 
         buttonUp = !buttonUp;
