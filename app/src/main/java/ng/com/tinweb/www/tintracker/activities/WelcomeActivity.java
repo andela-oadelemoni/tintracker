@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
-import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,8 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
@@ -79,28 +76,18 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void setupActivityRecognition() {
-        final TextView text = (TextView) findViewById(R.id.activity_action);
-        text.setMovementMethod(new ScrollingMovementMethod());
+
         //Broadcast receiver
         BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //Add current time
-                Calendar rightNow = Calendar.getInstance();
-                SimpleDateFormat sdf = new SimpleDateFormat("h:mm:ss a");
-                String strDate = sdf.format(rightNow.getTime());
 
                 String activity = intent.getStringExtra("activity");
                 int confidence = intent.getExtras().getInt("confidence");
 
-                String v = strDate + " " +
-                        activity + " " +
-                        "Confidence : " + confidence + "\n";
-
                 setActivityRecognitionAction(activity, confidence);
 
-                v = text.getText() + v;
-                text.setText(v);
             }
         };
 

@@ -29,9 +29,9 @@ public class TinTrackerActivityRecognition implements GoogleApiClient.Connection
 
     private void buildGoogleApiClient() {
         googleClient = new GoogleApiClient.Builder(context)
-                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
+                .addApi(ActivityRecognition.API)
                 .build();
         googleClient.connect();
     }
@@ -43,7 +43,7 @@ public class TinTrackerActivityRecognition implements GoogleApiClient.Connection
                 .getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Log.d("ActivityRegTag", "connected to ActivityRecognition");
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(googleClient, 10, pendingIntent);
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(googleClient, 0, pendingIntent);
 
     }
 
