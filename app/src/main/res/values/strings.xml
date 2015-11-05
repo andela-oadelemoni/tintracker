@@ -21,6 +21,10 @@
     <string name="nine">9</string>
     <string name="ten">10</string>
     <string name="app_preference_key">ng.com.tinweb.www.tintracker.PREFERENCE</string>
-    <string name="saved_high_score" />
+    <string name="saved_tracking_time" />
     <string name="seekbar_steps" />
+    <string name="service_not_available">Location Service Unavailable</string>
+    <string name="invalid_lat_long_used">Invalid Location Data</string>
+    <string name="no_address_found">No Address Found</string>
+    <string name="address_found">Address Found</string>
 </resources>
