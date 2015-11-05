@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
@@ -129,8 +130,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onCountDownFinish() {
                 // TODO something here
-                Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
-                progressView.setText("");
+                minimumTimeAction();
             }
 
             @Override
@@ -139,6 +139,13 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
         seekBarHandler.startTimer();
+    }
+
+    private void minimumTimeAction() {
+        Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
+        progressView.setText("");
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
     }
 
     private void resetStandStillTimer() {
