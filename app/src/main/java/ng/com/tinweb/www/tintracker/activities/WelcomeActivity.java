@@ -152,6 +152,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         timeBar.setProgress(0);
         String display = timeSetting+":00";
         timeLimit.setText(display);
+        if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
     }
 
     @Override
@@ -268,7 +269,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         int seek_label_pos = (((right - left) * progress) / seekbarSteps) + left;
         progressView.setX(seek_label_pos - progressView.getWidth() / 2);
 
-        progressView.setText(String.valueOf(progress));
+        int mins = progress / 60;
+        int secs = progress % 60;
+
+        String progressDisplay = (secs < 10) ? mins +":0"+secs : mins +":"+secs;
+
+        progressView.setText(progressDisplay);
     }
 
     @Override
