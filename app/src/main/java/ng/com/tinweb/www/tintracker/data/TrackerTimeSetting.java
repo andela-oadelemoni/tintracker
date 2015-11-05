@@ -26,12 +26,12 @@ public class TrackerTimeSetting {
 
     public void saveTimeSetting(int time) {
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt(activity.getString(R.string.saved_high_score), time);
+        editor.putInt(activity.getString(R.string.saved_tracking_time), time);
         editor.apply();
     }
 
     public int getTimeSetting() {
-        return sharedPref.getInt(activity.getString(R.string.saved_high_score), DEFAULT_TIME);
+        return sharedPref.getInt(activity.getString(R.string.saved_tracking_time), DEFAULT_TIME);
     }
 
 }
