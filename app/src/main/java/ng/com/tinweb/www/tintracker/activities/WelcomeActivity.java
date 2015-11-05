@@ -76,8 +76,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setupSettingBar();
         setUpTrackingTime();
 
-        setupLocationHelper();
-
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
 
     }
@@ -109,6 +107,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private void disAbleActivityRecognition() {
         //Filter the Intent and register broadcast receiver
         unregisterReceiver(receiver);
+        resetStandStillTimer();
     }
 
     private void setActivityRecognitionAction(String activity, int confidence) {
@@ -146,6 +145,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         progressView.setText("");
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(500);
+        setupLocationHelper();
     }
 
     private void resetStandStillTimer() {
@@ -276,14 +276,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
-            //locationHelper.stopLocationUpdates();
             disAbleActivityRecognition();
 
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
-            //locationHelper.startLocationUpdates();
             setupActivityRecognition();
         }
 
