@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.os.ResultReceiver;
 import android.widget.Toast;
-
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.appConfig.ContextProvider;
 
@@ -23,7 +22,6 @@ public class AddressResultReceiver extends ResultReceiver {
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
 
-        Toast.makeText(context, "Result received", Toast.LENGTH_LONG).show();
         // Display the address string
         // or an error message sent from the intent service.
         mAddressOutput = resultData.getString(AddressLookup.Constants.RESULT_DATA_KEY);

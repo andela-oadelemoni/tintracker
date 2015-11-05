@@ -1,10 +1,15 @@
 package ng.com.tinweb.www.tintracker.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,11 +21,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
+import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
@@ -66,7 +74,49 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         setupLocationHelper();
 
+        setupActivityRecognition();
 
+    }
+
+    private void setupActivityRecognition() {
+        final TextView text = (TextView) findViewById(R.id.activity_action);
+        text.setMovementMethod(new ScrollingMovementMethod());
+        //Broadcast receiver
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //Add current time
+                Calendar rightNow = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat("h:mm:ss a");
+                String strDate = sdf.format(rightNow.getTime());
+
+                String activity = intent.getStringExtra("activity");
+                int confidence = intent.getExtras().getInt("confidence");
+
+                String v = strDate + " " +
+                        activity + " " +
+                        "Confidence : " + confidence + "\n";
+
+                setActivityRecognitionAction(activity, confidence);
+
+                v = text.getText() + v;
+                text.setText(v);
+            }
+        };
+
+        //Filter the Intent and register broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ImActive");
+        registerReceiver(receiver, filter);
+
+        new TinTrackerActivityRecognition();
+    }
+
+    private void setActivityRecognitionAction(String activity, int confidence) {
+        if (confidence > 50) {
+            if (activity.equals("Not Moving")) gifFromResource.stop();
+            else gifFromResource.start();
+        }
     }
 
     private void setupLocationHelper() {
@@ -189,12 +239,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
-            locationHelper.stopLocationUpdates();
+            //locationHelper.stopLocationUpdates();
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
-            locationHelper.startLocationUpdates();
+            //locationHelper.startLocationUpdates();
         }
 
         buttonUp = !buttonUp;

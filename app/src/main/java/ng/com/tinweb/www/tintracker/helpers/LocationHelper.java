@@ -86,12 +86,6 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         Toast.makeText(context, "New Location is:\nLat: " + location.getLatitude() + "\nLong: " + location.getLongitude(), Toast.LENGTH_LONG).show();
     }
 
-    public interface LocationHelperCallback {
-        void onSuccess(Location location);
-        void onFailure();
-    }
-
-
     protected void startIntentService() {
         ResultReceiver mReceiver = new AddressResultReceiver(new Handler());
         Intent intent = new Intent(context, AddressLookup.class);
@@ -99,4 +93,5 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         intent.putExtra(AddressLookup.Constants.LOCATION_DATA_EXTRA, location);
         context.startService(intent);
     }
+
 }
