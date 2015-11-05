@@ -47,6 +47,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private int seekbarSteps;
     private TrackerTimeSetting trackerTimeSetting;
     private TextView timeLimit;
+    private TextView progressView;
 
     // Gif Image
     private GifDrawable gifFromResource;
@@ -57,6 +58,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private Location location;
 
     private SeekBarHandler seekBarHandler;
+    private boolean timerStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +108,39 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setActivityRecognitionAction(String activity, int confidence) {
         if (confidence > 50) {
-            if (activity.equals("Not Moving")) gifFromResource.stop();
-            else gifFromResource.start();
+            if (activity.equals("Not Moving")) {
+                gifFromResource.stop();
+                if (!timerStarted) startStandStillTimer();
+            }
+            else {
+                gifFromResource.start();
+                resetStandStillTimer();
+            }
         }
+    }
+
+    private void startStandStillTimer() {
+        timerStarted = true;
+        seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
+            @Override
+            public void onCountDownFinish() {
+                // TODO something here
+                Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
+                progressView.setText("");
+            }
+
+            @Override
+            public void seekBarTick(int progress) {
+                setProgressLabel(progress);
+            }
+        });
+        seekBarHandler.startTimer();
+    }
+
+    private void resetStandStillTimer() {
+        progressView.setText("");
+        timerStarted = false;
+        seekBarHandler.resetTimer();
     }
 
     private void setupLocationHelper() {
@@ -123,10 +155,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         // TextView
         timeLimit = (TextView) findViewById(R.id.time_limit);
+        progressView = (TextView) findViewById(R.id.progress_text);
 
         // SeekBar
         seekBarTimeSetting = (SeekBar) findViewById(R.id.time_settings_bar);
         timeBar = (SeekBar) findViewById(R.id.timebar);
+        timeBar.setEnabled(false);
 
         // Button
         action_button = (Button) findViewById(R.id.action_button);
@@ -232,26 +266,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
             //locationHelper.stopLocationUpdates();
-            seekBarHandler.resetTimer();
 
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
             //locationHelper.startLocationUpdates();
-            seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
-                @Override
-                public void onCountDownFinish() {
-                    // TODO something here
-                    Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void seekBarTick(int progress) {
-                    setProgressLabel(progress);
-                }
-            });
-            seekBarHandler.startTimer();
         }
 
         buttonUp = !buttonUp;
@@ -261,7 +281,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void setProgressLabel(int progress) {
-        TextView progressView = (TextView) findViewById(R.id.progress_text);
 
         int left = timeBar.getLeft() + timeBar.getPaddingLeft();
         int right = timeBar.getRight() - timeBar.getPaddingRight();
