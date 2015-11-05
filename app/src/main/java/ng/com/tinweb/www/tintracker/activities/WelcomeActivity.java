@@ -25,6 +25,7 @@ import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
+import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
 import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
@@ -55,6 +56,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private LocationHelper locationHelper;
     private Location location;
 
+    private SeekBarHandler seekBarHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +75,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setupLocationHelper();
 
         setupActivityRecognition();
+
+        seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
 
     }
 
@@ -221,17 +226,26 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void trackingButtonAction() {
-
         if (buttonUp) {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
             //locationHelper.stopLocationUpdates();
+            seekBarHandler.resetTimer();
+
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
             //locationHelper.startLocationUpdates();
+            seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
+                @Override
+                public void onCountDownFinish() {
+                    // TODO something here
+                    Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
+                }
+            });
+            seekBarHandler.startTimer();
         }
 
         buttonUp = !buttonUp;
