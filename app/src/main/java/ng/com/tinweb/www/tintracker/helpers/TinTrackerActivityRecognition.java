@@ -1,13 +1,17 @@
 package ng.com.tinweb.www.tintracker.helpers;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 
 import ng.com.tinweb.www.tintracker.appConfig.ContextProvider;
+import ng.com.tinweb.www.tintracker.data.ActivityRecognitionService;
 
 
 /**
@@ -17,6 +21,11 @@ public class TinTrackerActivityRecognition implements GoogleApiClient.Connection
 
     private GoogleApiClient googleClient;
     private Context context = ContextProvider.getContext();
+
+
+    public TinTrackerActivityRecognition() {
+        buildGoogleApiClient();
+    }
 
     private void buildGoogleApiClient() {
         googleClient = new GoogleApiClient.Builder(context)
@@ -29,6 +38,12 @@ public class TinTrackerActivityRecognition implements GoogleApiClient.Connection
 
     @Override
     public void onConnected(Bundle bundle) {
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        PendingIntent pendingIntent = PendingIntent
+                .getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Log.d("ActivityRegTag", "connected to ActivityRecognition");
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(googleClient, 10, pendingIntent);
 
     }
 
