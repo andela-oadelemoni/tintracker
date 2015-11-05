@@ -25,6 +25,7 @@ import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
+import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
 import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
@@ -33,6 +34,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     // Layout container
     private RelativeLayout container;
+    private BroadcastReceiver receiver;
 
     // Button
     private boolean buttonUp = false;
@@ -46,6 +48,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private int seekbarSteps;
     private TrackerTimeSetting trackerTimeSetting;
     private TextView timeLimit;
+    private TextView progressView;
 
     // Gif Image
     private GifDrawable gifFromResource;
@@ -54,6 +57,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     // Location object
     private LocationHelper locationHelper;
     private Location location;
+
+    private SeekBarHandler seekBarHandler;
+    private boolean timerStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,14 +77,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         setupLocationHelper();
 
-        setupActivityRecognition();
+        seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
 
     }
 
     private void setupActivityRecognition() {
 
         //Broadcast receiver
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //Add current time
@@ -99,11 +105,46 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         new TinTrackerActivityRecognition();
     }
 
+    private void disAbleActivityRecognition() {
+        //Filter the Intent and register broadcast receiver
+        unregisterReceiver(receiver);
+    }
+
     private void setActivityRecognitionAction(String activity, int confidence) {
         if (confidence > 50) {
-            if (activity.equals("Not Moving")) gifFromResource.stop();
-            else gifFromResource.start();
+            if (activity.equals("Not Moving")) {
+                gifFromResource.stop();
+                if (!timerStarted) startStandStillTimer();
+            }
+            else {
+                gifFromResource.start();
+                resetStandStillTimer();
+            }
         }
+    }
+
+    private void startStandStillTimer() {
+        timerStarted = true;
+        seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
+            @Override
+            public void onCountDownFinish() {
+                // TODO something here
+                Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
+                progressView.setText("");
+            }
+
+            @Override
+            public void seekBarTick(int progress) {
+                setProgressLabel(progress);
+            }
+        });
+        seekBarHandler.startTimer();
+    }
+
+    private void resetStandStillTimer() {
+        progressView.setText("");
+        timerStarted = false;
+        seekBarHandler.resetTimer();
     }
 
     private void setupLocationHelper() {
@@ -118,10 +159,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         // TextView
         timeLimit = (TextView) findViewById(R.id.time_limit);
+        progressView = (TextView) findViewById(R.id.progress_text);
 
         // SeekBar
         seekBarTimeSetting = (SeekBar) findViewById(R.id.time_settings_bar);
         timeBar = (SeekBar) findViewById(R.id.timebar);
+        timeBar.setEnabled(false);
 
         // Button
         action_button = (Button) findViewById(R.id.action_button);
@@ -147,6 +190,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         timeBar.setProgress(0);
         String display = timeSetting+":00";
         timeLimit.setText(display);
+        if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
     }
 
     @Override
@@ -221,23 +265,41 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void trackingButtonAction() {
-
         if (buttonUp) {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
             action_button.setText(R.string.start_tracking);
             gifFromResource.stop();
             //locationHelper.stopLocationUpdates();
+            disAbleActivityRecognition();
+
         } else {
             actionButtonParams.addRule(RelativeLayout.CENTER_VERTICAL, 0);
             actionButtonParams.setMargins(0, 50, 0, 0);
             action_button.setText(R.string.stop_tracking);
             //locationHelper.startLocationUpdates();
+            setupActivityRecognition();
         }
 
         buttonUp = !buttonUp;
         AppViewAnimation.toggleViewAnimation(gifImage);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
 
+    }
+
+    private void setProgressLabel(int progress) {
+
+        int left = timeBar.getLeft() + timeBar.getPaddingLeft();
+        int right = timeBar.getRight() - timeBar.getPaddingRight();
+
+        int seek_label_pos = (((right - left) * progress) / seekbarSteps) + left;
+        progressView.setX(seek_label_pos - progressView.getWidth() / 2);
+
+        int mins = progress / 60;
+        int secs = progress % 60;
+
+        String progressDisplay = (secs < 10) ? mins +":0"+secs : mins +":"+secs;
+
+        progressView.setText(progressDisplay);
     }
 
     @Override
