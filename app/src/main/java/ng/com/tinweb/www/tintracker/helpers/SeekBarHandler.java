@@ -29,6 +29,7 @@ public class SeekBarHandler {
 
             public void onTick(long millisUntilFinished) {
                 seekBar.setProgress(++progressSteps);
+                callback.seekBarTick(progressSteps);
             }
 
             public void onFinish() {
@@ -48,6 +49,7 @@ public class SeekBarHandler {
 
     public interface SeekBarHandlerCallBack {
         void onCountDownFinish();
+        void seekBarTick(int progress);
     }
 
 }

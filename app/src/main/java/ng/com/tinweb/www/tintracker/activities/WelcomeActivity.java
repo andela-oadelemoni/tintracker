@@ -244,6 +244,11 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                     // TODO something here
                     Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
                 }
+
+                @Override
+                public void seekBarTick(int progress) {
+                    setProgressLabel(progress);
+                }
             });
             seekBarHandler.startTimer();
         }
@@ -252,6 +257,18 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         AppViewAnimation.toggleViewAnimation(gifImage);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
 
+    }
+
+    private void setProgressLabel(int progress) {
+        TextView progressView = (TextView) findViewById(R.id.progress_text);
+
+        int left = timeBar.getLeft() + timeBar.getPaddingLeft();
+        int right = timeBar.getRight() - timeBar.getPaddingRight();
+
+        int seek_label_pos = (((right - left) * progress) / seekbarSteps) + left;
+        progressView.setX(seek_label_pos - progressView.getWidth() / 2);
+
+        progressView.setText(String.valueOf(progress));
     }
 
     @Override
