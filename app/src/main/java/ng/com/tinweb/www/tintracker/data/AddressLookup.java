@@ -112,6 +112,7 @@ public class AddressLookup extends IntentService {
 
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();
+        Log.i("Full Address:", message);
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         bundle.putString(Constants.RESULT_DATA_KEY, message);
         mReceiver.send(resultCode, bundle);
