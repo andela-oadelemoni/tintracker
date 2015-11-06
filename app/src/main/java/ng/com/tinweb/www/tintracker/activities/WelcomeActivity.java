@@ -8,7 +8,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,13 +25,14 @@ import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.database.LocationData;
+import ng.com.tinweb.www.tintracker.fragment.LocationHistoryFragment;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
 import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener {
 
     // Layout container
     private RelativeLayout container;
@@ -61,6 +61,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private SeekBarHandler seekBarHandler;
     private boolean timerStarted = false;
+    private LocationHistoryFragment historyFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,24 +78,29 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
+        setupHistoryFragment();
+    }
+
+    private void setupHistoryFragment() {
+        historyFragment = new LocationHistoryFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.history_fragment_container, historyFragment)
+                .detach(historyFragment)
+                .commit();
     }
 
     private void setupActivityRecognition() {
-
         //Broadcast receiver
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Add current time
 
                 String activity = intent.getStringExtra("activity");
                 int confidence = intent.getExtras().getInt("confidence");
 
                 setActivityRecognitionAction(activity, confidence);
-
             }
         };
-
         //Filter the Intent and register broadcast receiver
         IntentFilter filter = new IntentFilter();
         filter.addAction("ImActive");
@@ -140,7 +146,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void minimumTimeAction() {
-        Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
         progressView.setText("");
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(500);
@@ -159,15 +164,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
             @Override
             public void onSuccess(Location location) {
-                LocationData locationData = new LocationData(location);
-                //saveLocationToDb(location);
-                Toast.makeText(WelcomeActivity.this, "Location success: " + location.getLatitude(), Toast.LENGTH_LONG).show();
+                new LocationData(location);
             }
         });
-    }
-
-    private void saveLocationToDb(Location location) {
-        new LocationData(location);
     }
 
     private void setupViewProperties() {
@@ -231,7 +230,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 AppViewAnimation.toggleViewAnimation(timeSetting);
                 break;
             case R.id.action_history:
-                showHistoryPopUp();
+                toggleHistory();
                 break;
         }
 
@@ -246,8 +245,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -263,13 +261,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
     }
 
-    private void showHistoryPopUp() {
-        View view = findViewById(R.id.action_history);
-
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        popupMenu.setOnMenuItemClickListener(this);
-        popupMenu.inflate(R.menu.history);
-        popupMenu.show();
+    private void toggleHistory() {
+        if (historyFragment.isAdded())
+            getSupportFragmentManager().beginTransaction()
+                    .detach(historyFragment).commit();
+        else {
+            getSupportFragmentManager().beginTransaction()
+                    .attach(historyFragment).commit();
+        }
     }
 
     @Override
@@ -300,7 +299,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         buttonUp = !buttonUp;
         AppViewAnimation.toggleViewAnimation(gifImage);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
-
     }
 
     private void setProgressLabel(int progress) {
@@ -317,21 +315,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         String progressDisplay = (secs < 10) ? mins +":0"+secs : mins +":"+secs;
 
         progressView.setText(progressDisplay);
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-
-        switch(id) {
-            case R.id.by_date:
-                Toast.makeText(this, "Google API does all this shit ", Toast.LENGTH_LONG).show();
-                break;
-            case R.id.by_location:
-                Toast.makeText(this, "Location Option Picked", Toast.LENGTH_LONG).show();
-                break;
-        }
-        return false;
     }
 
 }
