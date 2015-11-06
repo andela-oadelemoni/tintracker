@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,18 +41,12 @@ public class TinTrackerActivityRecognition implements GoogleApiClient.Connection
         PendingIntent pendingIntent = PendingIntent
                 .getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Log.d("ActivityRegTag", "connected to ActivityRecognition");
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(googleClient, 0, pendingIntent);
-
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {}
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 }
