@@ -25,6 +25,7 @@ import java.io.IOException;
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
+import ng.com.tinweb.www.tintracker.database.LocationData;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
 import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
@@ -57,7 +58,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     // Location object
     private LocationHelper locationHelper;
-    private Location location;
 
     private SeekBarHandler seekBarHandler;
     private boolean timerStarted = false;
@@ -77,7 +77,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
-
     }
 
     private void setupActivityRecognition() {
@@ -156,6 +155,19 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setupLocationHelper() {
         locationHelper = new LocationHelper();
+
+        locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
+            @Override
+            public void onSuccess(Location location) {
+                LocationData locationData = new LocationData(location);
+                //saveLocationToDb(location);
+                Toast.makeText(WelcomeActivity.this, "Location success: " + location.getLatitude(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void saveLocationToDb(Location location) {
+        new LocationData(location);
     }
 
     private void setupViewProperties() {
