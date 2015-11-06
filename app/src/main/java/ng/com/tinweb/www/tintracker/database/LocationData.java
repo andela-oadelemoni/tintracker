@@ -8,8 +8,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.appConfig.ContextProvider;
@@ -30,7 +32,7 @@ public class LocationData implements AddressResultReceiver.Receiver {
     private int _id;
     private String longitude;
     private String latitude;
-    private String date = Calendar.getInstance().toString();
+    private String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
     private String address;
 
     public LocationData() {}
@@ -138,6 +140,12 @@ public class LocationData implements AddressResultReceiver.Receiver {
             // Writing Contacts to log
             Log.i("Name: ", log);
         }
+    }
+
+    public List<LocationData> getLocations() {
+        DatabaseHandler database = new DatabaseHandler(context);
+
+        return database.getAllLocations();
     }
 
 }
