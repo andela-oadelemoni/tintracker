@@ -7,7 +7,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -25,7 +25,7 @@ import ng.com.tinweb.www.tintracker.appConfig.ContextProvider;
  */
 public class AddressLookup extends IntentService {
 
-    protected AddressResultReceiver mReceiver = new AddressResultReceiver(new Handler());
+    protected ResultReceiver mReceiver;
     private Context context = ContextProvider.getContext();
 
     private static final String TAG = "AddressLookup";
@@ -49,6 +49,12 @@ public class AddressLookup extends IntentService {
      */
     public AddressLookup() {
         super(TAG);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
