@@ -27,4 +27,6 @@
     <string name="invalid_lat_long_used">Invalid Location Data</string>
     <string name="no_address_found">No Address Found</string>
     <string name="address_found">Address Found</string>
+    <string name="title_activity_history">Location History</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>
