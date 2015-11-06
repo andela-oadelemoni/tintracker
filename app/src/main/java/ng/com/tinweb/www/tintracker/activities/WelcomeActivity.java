@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,14 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.List;
 
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
-import ng.com.tinweb.www.tintracker.data.AddressLookup;
-import ng.com.tinweb.www.tintracker.data.AddressResultReceiver;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
-import ng.com.tinweb.www.tintracker.database.DatabaseHandler;
 import ng.com.tinweb.www.tintracker.database.LocationData;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
@@ -38,12 +32,11 @@ import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, AddressResultReceiver.Receiver {
+public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     // Layout container
     private RelativeLayout container;
     private BroadcastReceiver receiver;
-    private AddressResultReceiver resultReceiver;
 
     // Button
     private boolean buttonUp = false;
@@ -84,8 +77,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
-        resultReceiver = new AddressResultReceiver(new Handler());
-        resultReceiver.setReceiver(this);
     }
 
     private void setupActivityRecognition() {
@@ -168,33 +159,15 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
             @Override
             public void onSuccess(Location location) {
+                LocationData locationData = new LocationData(location);
                 //saveLocationToDb(location);
-                startIntentService(location);
                 Toast.makeText(WelcomeActivity.this, "Location success: " + location.getLatitude(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void saveLocationToDb(Location location) {
-        DatabaseHandler database = new DatabaseHandler(this);
-        LocationData locationData = new LocationData();
-        locationData.setID(1);
-        locationData.setLong(String.valueOf(location.getLongitude()));
-        locationData.setLat(String.valueOf(location.getLatitude()));
-
-        // Inserting Contacts
-        Log.d("Insert: ", "Inserting ..");
-        database.addLocation(locationData);
-
-        // Reading all contacts
-        Log.d("Reading: ", "Reading all contacts..");
-        List<LocationData> locations = database.getAllLocations();
-
-        for (LocationData cn : locations) {
-            String log = "Id: " + cn.getID() + " ,Lat: " + cn.getLat() + " ,Long: " + cn.getLong();
-            // Writing Contacts to log
-            Log.d("Name: ", log);
-        }
+        new LocationData(location);
     }
 
     private void setupViewProperties() {
@@ -361,22 +334,4 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         return false;
     }
 
-    @Override
-    public void onReceiveResult(int resultCode, Bundle resultData) {
-        String mAddressOutput = resultData.getString(AddressLookup.Constants.RESULT_DATA_KEY);
-
-        Toast.makeText(this, "Address: "+mAddressOutput, Toast.LENGTH_LONG).show();
-
-        // Show a toast message if an address was found.
-        if (resultCode == AddressLookup.Constants.SUCCESS_RESULT) {
-            Toast.makeText(this, R.string.address_found, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    protected void startIntentService(Location location) {
-        Intent intent = new Intent(this, AddressLookup.class);
-        intent.putExtra(AddressLookup.Constants.RECEIVER, resultReceiver);
-        intent.putExtra(AddressLookup.Constants.LOCATION_DATA_EXTRA, location);
-        startService(intent);
-    }
 }
