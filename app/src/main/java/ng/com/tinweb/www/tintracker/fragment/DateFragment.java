@@ -8,7 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 import ng.com.tinweb.www.tintracker.R;
+import ng.com.tinweb.www.tintracker.adapter.LocationHistoryAdapter;
+import ng.com.tinweb.www.tintracker.database.LocationData;
 
 /**
  * Created by kamiye on 11/6/15.
@@ -25,6 +29,12 @@ public class DateFragment extends Fragment {
         // set the recyclerview layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
+
+        LocationData location = new LocationData();
+        List<LocationData> locations = location.getLocations();
+
+        LocationHistoryAdapter adapter = new LocationHistoryAdapter(locations);
+        recyclerView.setAdapter(adapter);
 
         return rootView;
     }

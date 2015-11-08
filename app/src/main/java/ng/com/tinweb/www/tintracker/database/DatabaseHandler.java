@@ -77,9 +77,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public LocationData getLocation(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_LOCATIONS, new String[] { KEY_ID, KEY_ADDRESS,
-                        KEY_LAT, KEY_LONG, KEY_DATE }, KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
+        Cursor cursor = db.query(TABLE_LOCATIONS, new String[]{KEY_ID, KEY_ADDRESS,
+                        KEY_LAT, KEY_LONG, KEY_DATE}, KEY_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
@@ -131,6 +131,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // return count
         return cursor.getCount();
     }
+
     // Updating single location
     public int updateLocation(LocationData locationData) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -143,7 +144,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // updating row
         return db.update(TABLE_LOCATIONS, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(locationData.getID()) });
+                new String[]{String.valueOf(locationData.getID())});
 
     }
 
@@ -151,7 +152,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteLocation(LocationData locationData) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_LOCATIONS, KEY_ID + " = ?",
-                new String[] { String.valueOf(locationData.getID()) });
+                new String[]{String.valueOf(locationData.getID())});
         db.close();
     }
 }
