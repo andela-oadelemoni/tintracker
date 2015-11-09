@@ -29,10 +29,20 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/history_fragment_container"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="60dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="60dp" />
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/info_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginBottom="60dp"
-        android:layout_height="match_parent" />
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="60dp" />
 
 </android.support.design.widget.CoordinatorLayout>
