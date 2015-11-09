@@ -8,8 +8,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.appConfig.ContextProvider;
@@ -30,8 +32,10 @@ public class LocationData implements AddressResultReceiver.Receiver {
     private int _id;
     private String longitude;
     private String latitude;
-    private String date = Calendar.getInstance().toString();
+    private String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+    private String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
     private String address;
+    private int occurence;
 
     public LocationData() {}
 
@@ -57,12 +61,12 @@ public class LocationData implements AddressResultReceiver.Receiver {
         this._id = id;
     }
 
-    // setting name
+    // setting longitude
     public void setLongitude(String _long){
         this.longitude = _long;
     }
 
-    // setting name
+    // setting latitude
     public void setLatitude(String lat){
         this.latitude = lat;
     }
@@ -77,29 +81,49 @@ public class LocationData implements AddressResultReceiver.Receiver {
         this.date = date;
     }
 
+    // set time
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    // set occurence
+    public void setOccurence(int i) {
+        this.occurence = i;
+    }
+
     // getting ID
     public int getID(){
         return this._id;
     }
 
-    // getting name
+    // getting longitude
     public String getLongitude(){
         return this.longitude;
     }
 
-    // getting name
+    // getting latitude
     public String getLatitude(){
         return this.latitude;
     }
 
-    // getting name
+    // getting date
     public String getDate(){
         return this.date;
+    }
+
+    // getting time
+    public String getTime() {
+        return this.time;
     }
 
     // getting phone number
     public String getAddress(){
         return this.address;
+    }
+
+    // get occurence
+    public int getOccurence() {
+        return this.occurence;
     }
 
     protected void startAddressLookup() {
@@ -138,6 +162,17 @@ public class LocationData implements AddressResultReceiver.Receiver {
             // Writing Contacts to log
             Log.i("Name: ", log);
         }
+    }
+
+    public List<LocationData> getLocations() {
+        DatabaseHandler database = new DatabaseHandler(context);
+
+        return database.getAllLocations();
+    }
+
+    public List<LocationData> getLocationsByGroup() {
+        DatabaseHandler database = new DatabaseHandler(context);
+        return database.getLocationsByGroup();
     }
 
 }

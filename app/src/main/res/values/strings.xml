@@ -3,6 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="app_launcher_logo">Application Launcher Logo</string>
     <string name="action_history">History</string>
+    <string name="action_info">Info</string>
     <string name="start_tracking">Start Tracking</string>
     <string name="stop_tracking">Stop Tracking</string>
     <string name="default_tracking_time">5:00</string>
@@ -23,8 +24,10 @@
     <string name="app_preference_key">ng.com.tinweb.www.tintracker.PREFERENCE</string>
     <string name="saved_tracking_time" />
     <string name="seekbar_steps" />
-    <string name="service_not_available">Location Service Unavailable</string>
+    <string name="service_not_available">Unknown Address</string>
     <string name="invalid_lat_long_used">Invalid Location Data</string>
     <string name="no_address_found">No Address Found</string>
     <string name="address_found">Address Found</string>
+    <string name="title_activity_history">Location History</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

@@ -1,14 +1,17 @@
 package ng.com.tinweb.www.tintracker.activities;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,14 +29,16 @@ import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.database.LocationData;
+import ng.com.tinweb.www.tintracker.fragment.LocationHistoryFragment;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
 import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final int MY_PERMISSIONS_REQUEST_CODE = 1;
     // Layout container
     private RelativeLayout container;
     private BroadcastReceiver receiver;
@@ -61,6 +66,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private SeekBarHandler seekBarHandler;
     private boolean timerStarted = false;
+    private LocationHistoryFragment historyFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,24 +83,29 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
+        setupHistoryFragment();
+    }
+
+    private void setupHistoryFragment() {
+        historyFragment = new LocationHistoryFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.history_fragment_container, historyFragment)
+                .detach(historyFragment)
+                .commit();
     }
 
     private void setupActivityRecognition() {
-
         //Broadcast receiver
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Add current time
 
                 String activity = intent.getStringExtra("activity");
                 int confidence = intent.getExtras().getInt("confidence");
 
                 setActivityRecognitionAction(activity, confidence);
-
             }
         };
-
         //Filter the Intent and register broadcast receiver
         IntentFilter filter = new IntentFilter();
         filter.addAction("ImActive");
@@ -114,8 +125,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             if (activity.equals("Not Moving")) {
                 gifFromResource.stop();
                 if (!timerStarted) startStandStillTimer();
-            }
-            else {
+            } else {
                 gifFromResource.start();
                 resetStandStillTimer();
             }
@@ -140,7 +150,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void minimumTimeAction() {
-        Toast.makeText(WelcomeActivity.this, "Count down finished", Toast.LENGTH_LONG).show();
         progressView.setText("");
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(500);
@@ -155,19 +164,65 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setupLocationHelper() {
         locationHelper = new LocationHelper();
-
-        locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
-            @Override
-            public void onSuccess(Location location) {
-                LocationData locationData = new LocationData(location);
-                //saveLocationToDb(location);
-                Toast.makeText(WelcomeActivity.this, "Location success: " + location.getLatitude(), Toast.LENGTH_LONG).show();
-            }
-        });
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
+                @Override
+                public void onSuccess(Location location) {
+                    new LocationData(location);
+                }
+            });
+        } else {
+            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_LONG).show();
+            requestLocationPermission();
+        }
     }
 
-    private void saveLocationToDb(Location location) {
-        new LocationData(location);
+    private void requestLocationPermission() {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            Toast.makeText(this, "Location Permission needed to save current location", Toast.LENGTH_LONG).show();
+            // Show an expanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        } else {
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_CODE);
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setupLocationHelper();
+                } else {
+                    Toast.makeText(this, "Oops! Location Request Denied", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
     private void setupViewProperties() {
@@ -193,7 +248,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setupGifImage() {
         try {
-            gifFromResource = new GifDrawable( getResources(), R.drawable.walking );
+            gifFromResource = new GifDrawable(getResources(), R.drawable.walking);
             gifImage.setImageDrawable(gifFromResource);
             gifFromResource.stop();
         } catch (IOException e) {
@@ -207,7 +262,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         seekBarTimeSetting.setProgress(timeSetting - 1);
         timeBar.setMax(seekbarSteps);
         timeBar.setProgress(0);
-        String display = timeSetting+":00";
+        String display = timeSetting + ":00";
         timeLimit.setText(display);
         if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
     }
@@ -231,10 +286,12 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 AppViewAnimation.toggleViewAnimation(timeSetting);
                 break;
             case R.id.action_history:
-                showHistoryPopUp();
+                toggleHistory();
+                break;
+            case R.id.action_info:
+                Toast.makeText(this, "Application info", Toast.LENGTH_LONG).show();
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -263,13 +320,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
     }
 
-    private void showHistoryPopUp() {
-        View view = findViewById(R.id.action_history);
-
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        popupMenu.setOnMenuItemClickListener(this);
-        popupMenu.inflate(R.menu.history);
-        popupMenu.show();
+    private void toggleHistory() {
+        if (historyFragment.isAdded()) {
+            getSupportFragmentManager().beginTransaction()
+                    .detach(historyFragment).commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .attach(historyFragment).commit();
+        }
     }
 
     @Override
@@ -300,7 +358,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         buttonUp = !buttonUp;
         AppViewAnimation.toggleViewAnimation(gifImage);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
-
     }
 
     private void setProgressLabel(int progress) {
@@ -314,24 +371,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         int mins = progress / 60;
         int secs = progress % 60;
 
-        String progressDisplay = (secs < 10) ? mins +":0"+secs : mins +":"+secs;
+        String progressDisplay = (secs < 10) ? mins + ":0" + secs : mins + ":" + secs;
 
         progressView.setText(progressDisplay);
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-
-        switch(id) {
-            case R.id.by_date:
-                Toast.makeText(this, "Google API does all this shit ", Toast.LENGTH_LONG).show();
-                break;
-            case R.id.by_location:
-                Toast.makeText(this, "Location Option Picked", Toast.LENGTH_LONG).show();
-                break;
-        }
-        return false;
     }
 
 }
