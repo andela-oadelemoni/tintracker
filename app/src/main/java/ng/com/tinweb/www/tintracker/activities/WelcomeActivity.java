@@ -1,12 +1,16 @@
 package ng.com.tinweb.www.tintracker.activities;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -34,6 +38,7 @@ import pl.droidsonroids.gif.GifImageView;
 
 public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final int MY_PERMISSIONS_REQUEST_CODE = 1;
     // Layout container
     private RelativeLayout container;
     private BroadcastReceiver receiver;
@@ -160,13 +165,43 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setupLocationHelper() {
         locationHelper = new LocationHelper();
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
+                @Override
+                public void onSuccess(Location location) {
+                    new LocationData(location);
+                }
+            });
+        }
+        else {
+            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_LONG).show();
+            requestLocationPermission();
+        }
+    }
 
-        locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
-            @Override
-            public void onSuccess(Location location) {
-                new LocationData(location);
-            }
-        });
+    private void requestLocationPermission() {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            Toast.makeText(this, "Location Permission needed to save current location", Toast.LENGTH_LONG).show();
+            // Show an expanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        } else {
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_CODE);
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+        }
     }
 
     private void setupViewProperties() {
@@ -232,6 +267,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.action_history:
                 toggleHistory();
                 break;
+            case R.id.action_info:
+                Toast.makeText(this, "Application info", Toast.LENGTH_LONG).show();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -262,9 +300,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void toggleHistory() {
-        if (historyFragment.isAdded())
+        if (historyFragment.isAdded()) {
             getSupportFragmentManager().beginTransaction()
                     .detach(historyFragment).commit();
+        }
         else {
             getSupportFragmentManager().beginTransaction()
                     .attach(historyFragment).commit();
@@ -315,6 +354,29 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         String progressDisplay = (secs < 10) ? mins +":0"+secs : mins +":"+secs;
 
         progressView.setText(progressDisplay);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setupLocationHelper();
+                } else {
+                    Toast.makeText(this, "Oops! Location Request Denied", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
 }

@@ -33,6 +33,7 @@ public class LocationData implements AddressResultReceiver.Receiver {
     private String longitude;
     private String latitude;
     private String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+    private String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
     private String address;
 
     public LocationData() {}
@@ -59,12 +60,12 @@ public class LocationData implements AddressResultReceiver.Receiver {
         this._id = id;
     }
 
-    // setting name
+    // setting longitude
     public void setLongitude(String _long){
         this.longitude = _long;
     }
 
-    // setting name
+    // setting latitude
     public void setLatitude(String lat){
         this.latitude = lat;
     }
@@ -79,24 +80,34 @@ public class LocationData implements AddressResultReceiver.Receiver {
         this.date = date;
     }
 
+    // set time
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     // getting ID
     public int getID(){
         return this._id;
     }
 
-    // getting name
+    // getting longitude
     public String getLongitude(){
         return this.longitude;
     }
 
-    // getting name
+    // getting latitude
     public String getLatitude(){
         return this.latitude;
     }
 
-    // getting name
+    // getting date
     public String getDate(){
         return this.date;
+    }
+
+    // getting time
+    public String getTime() {
+        return this.time;
     }
 
     // getting phone number

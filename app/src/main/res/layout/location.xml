@@ -16,7 +16,8 @@
         android:id="@+id/location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/date_label">
+        android:layout_below="@+id/date_label"
+        android:layout_marginTop="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,17 +49,18 @@
                 android:scrollHorizontally="true"
                 android:textSize="12sp"
                 android:textStyle="italic" />
-            <!--
-                        <TextView
-                            android:id="@+id/location_date"
-                            android:textStyle="italic"
-                            android:textSize="12sp"
-                            android:layout_marginTop="3dp"
-                            android:layout_marginLeft="22dp"
-                            android:layout_marginStart="22dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />-->
+
+            <TextView
+                android:id="@+id/location_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:drawableLeft="@drawable/ic_timer"
+                android:drawablePadding="5dp"
+                android:drawableStart="@drawable/ic_timer"
+                android:layout_marginTop="5dp"
+                android:textSize="12sp"
+                android:textStyle="italic" />
 
         </LinearLayout>
 

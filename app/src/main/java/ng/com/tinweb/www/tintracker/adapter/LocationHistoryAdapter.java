@@ -22,7 +22,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         static TextView dateLabel;
         static TextView address;
         static TextView coordinates;
-        //static TextView date;
+        static TextView time;
 
         LocationViewHolder(View itemView) {
             super(itemView);
@@ -30,7 +30,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
             dateLabel = (TextView) itemView.findViewById(R.id.date_label);
             address = (TextView) itemView.findViewById(R.id.location_address);
             coordinates = (TextView) itemView.findViewById(R.id.location_coordinates);
-            //date = (TextView) itemView.findViewById(R.id.location_date);
+            time = (TextView) itemView.findViewById(R.id.location_time);
         }
     }
 
@@ -61,6 +61,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         String latitude = location.getLatitude();
         String coord = "Lat: " + latitude + " Long: " + longitude;
         String date = location.getDate();
+        String time = location.getTime();
 
         if (isNewDate) {
             LocationViewHolder.dateLabel.setText(date);
@@ -70,7 +71,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         }
         LocationViewHolder.address.setText(address);
         LocationViewHolder.coordinates.setText(coord);
-        //LocationViewHolder.date.setText(date);
+        LocationViewHolder.time.setText(time);
 
         checkForNewDate(date, i);
     }
