@@ -33,9 +33,9 @@ public class LocationFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         LocationData location = new LocationData();
-        List<LocationData> locations = location.getLocations();
+        List<LocationData> locations = location.getLocationsByGroup();
 
-        LocationHistoryAdapter adapter = new LocationHistoryAdapter(locations);
+        LocationHistoryAdapter adapter = new LocationHistoryAdapter(locations, true);
         recyclerView.setAdapter(adapter);
 
         return rootView;

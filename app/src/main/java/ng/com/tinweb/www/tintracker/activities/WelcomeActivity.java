@@ -125,8 +125,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             if (activity.equals("Not Moving")) {
                 gifFromResource.stop();
                 if (!timerStarted) startStandStillTimer();
-            }
-            else {
+            } else {
                 gifFromResource.start();
                 resetStandStillTimer();
             }
@@ -173,8 +172,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                     new LocationData(location);
                 }
             });
-        }
-        else {
+        } else {
             Toast.makeText(this, "Location permission not granted", Toast.LENGTH_LONG).show();
             requestLocationPermission();
         }
@@ -204,6 +202,29 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setupLocationHelper();
+                } else {
+                    Toast.makeText(this, "Oops! Location Request Denied", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
     private void setupViewProperties() {
 
         // View Group
@@ -227,7 +248,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setupGifImage() {
         try {
-            gifFromResource = new GifDrawable( getResources(), R.drawable.walking );
+            gifFromResource = new GifDrawable(getResources(), R.drawable.walking);
             gifImage.setImageDrawable(gifFromResource);
             gifFromResource.stop();
         } catch (IOException e) {
@@ -241,7 +262,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         seekBarTimeSetting.setProgress(timeSetting - 1);
         timeBar.setMax(seekbarSteps);
         timeBar.setProgress(0);
-        String display = timeSetting+":00";
+        String display = timeSetting + ":00";
         timeLimit.setText(display);
         if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
     }
@@ -271,7 +292,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 Toast.makeText(this, "Application info", Toast.LENGTH_LONG).show();
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -283,7 +303,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -303,8 +324,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         if (historyFragment.isAdded()) {
             getSupportFragmentManager().beginTransaction()
                     .detach(historyFragment).commit();
-        }
-        else {
+        } else {
             getSupportFragmentManager().beginTransaction()
                     .attach(historyFragment).commit();
         }
@@ -351,32 +371,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         int mins = progress / 60;
         int secs = progress % 60;
 
-        String progressDisplay = (secs < 10) ? mins +":0"+secs : mins +":"+secs;
+        String progressDisplay = (secs < 10) ? mins + ":0" + secs : mins + ":" + secs;
 
         progressView.setText(progressDisplay);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    setupLocationHelper();
-                } else {
-                    Toast.makeText(this, "Oops! Location Request Denied", Toast.LENGTH_LONG).show();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
     }
 
 }

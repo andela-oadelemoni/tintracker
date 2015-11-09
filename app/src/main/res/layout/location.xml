@@ -22,47 +22,66 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="5dp">
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/location_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_directions_grey"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_directions_grey"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/location_coordinates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:drawableLeft="@drawable/ic_place_grey"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_place_grey"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:textSize="12sp"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:id="@+id/location_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:drawableLeft="@drawable/ic_timer"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_timer"
+                    android:layout_marginTop="5dp"
+                    android:textSize="12sp"
+                    android:textStyle="italic" />
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/location_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_directions_grey"
-                android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_directions_grey"
-                android:maxLines="1"
-                android:scrollHorizontally="true"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/location_coordinates"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:drawableLeft="@drawable/ic_place_grey"
-                android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_place_grey"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:scrollHorizontally="true"
-                android:textSize="12sp"
-                android:textStyle="italic" />
-
-            <TextView
-                android:id="@+id/location_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/occurrence"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_gravity="center_vertical"
-                android:drawableLeft="@drawable/ic_timer"
-                android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_timer"
-                android:layout_marginTop="5dp"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+                android:gravity="center"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
+
 
 
     </android.support.v7.widget.CardView>

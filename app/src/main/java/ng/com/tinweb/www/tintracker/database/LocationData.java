@@ -35,6 +35,7 @@ public class LocationData implements AddressResultReceiver.Receiver {
     private String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
     private String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
     private String address;
+    private int occurence;
 
     public LocationData() {}
 
@@ -85,6 +86,11 @@ public class LocationData implements AddressResultReceiver.Receiver {
         this.time = time;
     }
 
+    // set occurence
+    public void setOccurence(int i) {
+        this.occurence = i;
+    }
+
     // getting ID
     public int getID(){
         return this._id;
@@ -113,6 +119,11 @@ public class LocationData implements AddressResultReceiver.Receiver {
     // getting phone number
     public String getAddress(){
         return this.address;
+    }
+
+    // get occurence
+    public int getOccurence() {
+        return this.occurence;
     }
 
     protected void startAddressLookup() {
@@ -157,6 +168,11 @@ public class LocationData implements AddressResultReceiver.Receiver {
         DatabaseHandler database = new DatabaseHandler(context);
 
         return database.getAllLocations();
+    }
+
+    public List<LocationData> getLocationsByGroup() {
+        DatabaseHandler database = new DatabaseHandler(context);
+        return database.getLocationsByGroup();
     }
 
 }

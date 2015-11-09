@@ -161,4 +161,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(locationData.getID())});
         db.close();
     }
+
+    public List<LocationData> getLocationsByGroup() {
+        List<LocationData> locationList = new ArrayList<>();
+        // Select All Query
+        String selectQuery = "SELECT  *, COUNT(" + KEY_ADDRESS + ") AS address_count FROM " + TABLE_LOCATIONS + " GROUP BY "
+                + KEY_ADDRESS + " ORDER BY address_count DESC";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                LocationData locationData = new LocationData();
+                locationData.setID(Integer.parseInt(cursor.getString(0)));
+                locationData.setAddress(cursor.getString(1));
+                locationData.setLatitude(cursor.getString(2));
+                locationData.setLongitude(cursor.getString(3));
+                locationData.setDate(cursor.getString(4));
+                locationData.setTime(cursor.getString(5));
+                locationData.setOccurence(cursor.getInt(6)); // for column count result
+                // Adding contact to list
+                locationList.add(locationData);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return locationList;
+    }
 }

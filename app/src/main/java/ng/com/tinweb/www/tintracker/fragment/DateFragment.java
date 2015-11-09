@@ -33,7 +33,7 @@ public class DateFragment extends Fragment {
         LocationData location = new LocationData();
         List<LocationData> locations = location.getLocations();
 
-        LocationHistoryAdapter adapter = new LocationHistoryAdapter(locations);
+        LocationHistoryAdapter adapter = new LocationHistoryAdapter(locations, false);
         recyclerView.setAdapter(adapter);
 
         return rootView;
