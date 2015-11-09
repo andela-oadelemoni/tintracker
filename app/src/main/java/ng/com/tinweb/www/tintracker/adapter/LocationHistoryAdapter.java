@@ -23,6 +23,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         static TextView address;
         static TextView coordinates;
         static TextView time;
+        static TextView occurrence;
 
         LocationViewHolder(View itemView) {
             super(itemView);
@@ -31,14 +32,17 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
             address = (TextView) itemView.findViewById(R.id.location_address);
             coordinates = (TextView) itemView.findViewById(R.id.location_coordinates);
             time = (TextView) itemView.findViewById(R.id.location_time);
+            occurrence = (TextView) itemView.findViewById(R.id.occurrence);
         }
     }
 
     List<LocationData> locationDataList;
     boolean isNewDate = true;
+    boolean isByLocation;
 
-    public LocationHistoryAdapter(List<LocationData> locationDataList) {
+    public LocationHistoryAdapter(List<LocationData> locationDataList, boolean isByLocation) {
         this.locationDataList = locationDataList;
+        this.isByLocation = isByLocation;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         String date = location.getDate();
         String time = location.getTime();
 
-        if (isNewDate) {
+        if (isNewDate && !isByLocation) {
             LocationViewHolder.dateLabel.setText(date);
             isNewDate = false;
         } else {
@@ -71,7 +75,11 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         }
         LocationViewHolder.address.setText(address);
         LocationViewHolder.coordinates.setText(coord);
-        LocationViewHolder.time.setText(time);
+        if (!isByLocation) LocationViewHolder.time.setText(time);
+        else {
+            LocationViewHolder.time.setHeight(0);
+            LocationViewHolder.occurrence.setText(String.valueOf(location.getOccurence()));
+        }
 
         checkForNewDate(date, i);
     }
