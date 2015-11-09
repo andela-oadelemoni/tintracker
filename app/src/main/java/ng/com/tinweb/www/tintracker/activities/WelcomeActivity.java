@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +30,7 @@ import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.database.LocationData;
+import ng.com.tinweb.www.tintracker.fragment.InfoFragment;
 import ng.com.tinweb.www.tintracker.fragment.LocationHistoryFragment;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
@@ -67,6 +69,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private SeekBarHandler seekBarHandler;
     private boolean timerStarted = false;
     private LocationHistoryFragment historyFragment;
+    private InfoFragment infoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,14 +86,19 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
-        setupHistoryFragment();
+        setupFragments();
     }
 
-    private void setupHistoryFragment() {
+    private void setupFragments() {
         historyFragment = new LocationHistoryFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.history_fragment_container, historyFragment)
                 .detach(historyFragment)
+                .commit();
+        infoFragment = new InfoFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.info_fragment_container, infoFragment)
+                .detach(infoFragment)
                 .commit();
     }
 
@@ -289,10 +297,26 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 toggleHistory();
                 break;
             case R.id.action_info:
-                Toast.makeText(this, "Application info", Toast.LENGTH_LONG).show();
+                toggleAppInfo();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleAppInfo() {
+        detachExistingFragment(historyFragment);
+        if (infoFragment.isAdded()) {
+            getSupportFragmentManager().beginTransaction()
+                    .detach(infoFragment).commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .attach(infoFragment).commit();
+        }
+    }
+
+    private void detachExistingFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .detach(fragment).commit();
     }
 
     private void setupSettingBar() {
@@ -321,6 +345,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void toggleHistory() {
+        detachExistingFragment(infoFragment);
         if (historyFragment.isAdded()) {
             getSupportFragmentManager().beginTransaction()
                     .detach(historyFragment).commit();

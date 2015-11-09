@@ -30,4 +30,14 @@
     <string name="address_found">Address Found</string>
     <string name="title_activity_history">Location History</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="part_one"><b>TinTracker</b> is a productivity management application that helps track places you spend
+        most of your time.
+        \n\nTo use this application, tap the settings icon to set the minimum time, then tap on the
+        \'Start Tracking\' button.
+        \n\nWhen you\'re at a stationary position for the minimum time set, your location is recorded (allow application to
+        access your location if necessary).
+        \n\nYou can check the log of places you\'ve spend most time by tapping on the history icon.
+        \n\n<i>For bugs and issues, contact application developer (Oluwakamiye) on oluwakamiye.adelemoni@andela.com.</i>
+    </string>
+    <string name="info_title">Application Info</string>
 </resources>
