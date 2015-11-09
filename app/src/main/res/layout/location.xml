@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/date_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/date_label"
+        android:layout_marginTop="5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/location_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_directions_grey"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_directions_grey"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/location_coordinates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:drawableLeft="@drawable/ic_place_grey"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_place_grey"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:textSize="12sp"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:id="@+id/location_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:drawableLeft="@drawable/ic_timer"
+                    android:drawablePadding="5dp"
+                    android:drawableStart="@drawable/ic_timer"
+                    android:layout_marginTop="5dp"
+                    android:textSize="12sp"
+                    android:textStyle="italic" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/occurrence"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
