@@ -63,11 +63,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private GifDrawable gifFromResource;
     private GifImageView gifImage;
 
-    // Location object
-    private LocationHelper locationHelper;
-
     private SeekBarHandler seekBarHandler;
     private boolean timerStarted = false;
+
+    // fragments
     private LocationHistoryFragment historyFragment;
     private InfoFragment infoFragment;
 
@@ -89,6 +88,67 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setupFragments();
     }
 
+    private void setupViewProperties() {
+
+        // View Group
+        container = (RelativeLayout) findViewById(R.id.container);
+        gifImage = (GifImageView) findViewById(R.id.gif_image);
+
+        // TextView
+        timeLimit = (TextView) findViewById(R.id.time_limit);
+        progressView = (TextView) findViewById(R.id.progress_text);
+
+        // SeekBar
+        seekBarTimeSetting = (SeekBar) findViewById(R.id.time_settings_bar);
+        timeBar = (SeekBar) findViewById(R.id.timebar);
+        timeBar.setEnabled(false);
+
+        // Button
+        action_button = (Button) findViewById(R.id.action_button);
+        actionButtonParams = (RelativeLayout.LayoutParams) action_button.getLayoutParams();
+        action_button.setOnClickListener(this);
+    }
+
+    private void setupGifImage() {
+        try {
+            gifFromResource = new GifDrawable(getResources(), R.drawable.walking);
+            gifImage.setImageDrawable(gifFromResource);
+            gifFromResource.stop();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupSettingBar() {
+        seekBarTimeSetting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                timeSetting = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (timeSetting < 10) timeSetting = timeSetting + 1;
+                updateTimeSetting(timeSetting);
+            }
+        });
+    }
+
+    private void setUpTrackingTime() {
+        int timeSetting = trackerTimeSetting.getTimeSetting();
+        seekbarSteps = timeSetting * 60;
+        seekBarTimeSetting.setProgress(timeSetting - 1);
+        timeBar.setMax(seekbarSteps);
+        timeBar.setProgress(0);
+        String display = timeSetting + ":00";
+        timeLimit.setText(display);
+        if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
+    }
+
     private void setupFragments() {
         historyFragment = new LocationHistoryFragment();
         getSupportFragmentManager().beginTransaction()
@@ -102,76 +162,47 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 .commit();
     }
 
-    private void setupActivityRecognition() {
-        //Broadcast receiver
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
 
-                String activity = intent.getStringExtra("activity");
-                int confidence = intent.getExtras().getInt("confidence");
-
-                setActivityRecognitionAction(activity, confidence);
-            }
-        };
-        //Filter the Intent and register broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ImActive");
-        registerReceiver(receiver, filter);
-
-        new TinTrackerActivityRecognition();
-    }
-
-    private void disAbleActivityRecognition() {
-        //Filter the Intent and register broadcast receiver
-        unregisterReceiver(receiver);
-        resetStandStillTimer();
-    }
-
-    private void setActivityRecognitionAction(String activity, int confidence) {
-        if (confidence > 50) {
-            if (activity.equals("Not Moving")) {
-                gifFromResource.stop();
-                if (!timerStarted) startStandStillTimer();
-            } else {
-                gifFromResource.start();
-                resetStandStillTimer();
-            }
+        switch (id) {
+            case R.id.action_button:
+                trackingButtonAction();
+                break;
         }
     }
 
-    private void startStandStillTimer() {
-        timerStarted = true;
-        seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
-            @Override
-            public void onCountDownFinish() {
-                // TODO something here
-                minimumTimeAction();
-            }
-
-            @Override
-            public void seekBarTick(int progress) {
-                setProgressLabel(progress);
-            }
-        });
-        seekBarHandler.startTimer();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_welcome, menu);
+        return true;
     }
 
-    private void minimumTimeAction() {
-        progressView.setText("");
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(500);
-        setupLocationHelper();
-    }
-
-    private void resetStandStillTimer() {
-        progressView.setText("");
-        timerStarted = false;
-        seekBarHandler.resetTimer();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_settings:
+                LinearLayout timeSetting = (LinearLayout) findViewById(R.id.time_setting);
+                AppViewAnimation.toggleViewAnimation(timeSetting);
+                break;
+            case R.id.action_history:
+                toggleHistory();
+                break;
+            case R.id.action_info:
+                toggleAppInfo();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setupLocationHelper() {
-        locationHelper = new LocationHelper();
+        LocationHelper locationHelper = new LocationHelper();
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
             locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
@@ -233,84 +264,23 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void setupViewProperties() {
-
-        // View Group
-        container = (RelativeLayout) findViewById(R.id.container);
-        gifImage = (GifImageView) findViewById(R.id.gif_image);
-
-        // TextView
-        timeLimit = (TextView) findViewById(R.id.time_limit);
-        progressView = (TextView) findViewById(R.id.progress_text);
-
-        // SeekBar
-        seekBarTimeSetting = (SeekBar) findViewById(R.id.time_settings_bar);
-        timeBar = (SeekBar) findViewById(R.id.timebar);
-        timeBar.setEnabled(false);
-
-        // Button
-        action_button = (Button) findViewById(R.id.action_button);
-        actionButtonParams = (RelativeLayout.LayoutParams) action_button.getLayoutParams();
-        action_button.setOnClickListener(this);
-    }
-
-    private void setupGifImage() {
-        try {
-            gifFromResource = new GifDrawable(getResources(), R.drawable.walking);
-            gifImage.setImageDrawable(gifFromResource);
-            gifFromResource.stop();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setUpTrackingTime() {
-        int timeSetting = trackerTimeSetting.getTimeSetting();
-        seekbarSteps = timeSetting * 60;
-        seekBarTimeSetting.setProgress(timeSetting - 1);
-        timeBar.setMax(seekbarSteps);
-        timeBar.setProgress(0);
-        String display = timeSetting + ":00";
-        timeLimit.setText(display);
-        if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_welcome, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_settings:
-                LinearLayout timeSetting = (LinearLayout) findViewById(R.id.time_setting);
-                AppViewAnimation.toggleViewAnimation(timeSetting);
-                break;
-            case R.id.action_history:
-                toggleHistory();
-                break;
-            case R.id.action_info:
-                toggleAppInfo();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void toggleAppInfo() {
         detachExistingFragment(historyFragment);
-        if (infoFragment.isAdded()) {
+        toggleFragment(infoFragment);
+    }
+
+    private void toggleHistory() {
+        detachExistingFragment(infoFragment);
+        toggleFragment(historyFragment);
+    }
+
+    private void toggleFragment(Fragment fragment) {
+        if (fragment.isAdded()) {
             getSupportFragmentManager().beginTransaction()
-                    .detach(infoFragment).commit();
+                    .detach(fragment).commit();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .attach(infoFragment).commit();
+                    .attach(fragment).commit();
         }
     }
 
@@ -319,51 +289,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 .detach(fragment).commit();
     }
 
-    private void setupSettingBar() {
-        seekBarTimeSetting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                timeSetting = progress;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (timeSetting < 10) timeSetting = timeSetting + 1;
-                updateTimeSetting(timeSetting);
-            }
-        });
-    }
-
     private void updateTimeSetting(int time) {
         trackerTimeSetting.saveTimeSetting(time);
         Toast.makeText(WelcomeActivity.this, "Tracking time changed to: " + timeSetting + " minute(s)", Toast.LENGTH_LONG).show();
         setUpTrackingTime();
-    }
-
-    private void toggleHistory() {
-        detachExistingFragment(infoFragment);
-        if (historyFragment.isAdded()) {
-            getSupportFragmentManager().beginTransaction()
-                    .detach(historyFragment).commit();
-        } else {
-            getSupportFragmentManager().beginTransaction()
-                    .attach(historyFragment).commit();
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-
-        switch (id) {
-            case R.id.action_button:
-                trackingButtonAction();
-                break;
-        }
     }
 
     private void trackingButtonAction() {
@@ -383,6 +312,73 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         buttonUp = !buttonUp;
         AppViewAnimation.toggleViewAnimation(gifImage);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
+    }
+
+    private void setupActivityRecognition() {
+        //Broadcast receiver
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String activity = intent.getStringExtra("activity");
+                int confidence = intent.getExtras().getInt("confidence");
+
+                setActivityRecognitionAction(activity, confidence);
+            }
+        };
+        //Filter the Intent and register broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ImActive");
+        registerReceiver(receiver, filter);
+
+        new TinTrackerActivityRecognition();
+    }
+
+    private void setActivityRecognitionAction(String activity, int confidence) {
+        if (confidence > 50) {
+            if (activity.equals("Not Moving")) {
+                gifFromResource.stop();
+                if (!timerStarted) startStandStillTimer();
+            } else {
+                gifFromResource.start();
+                resetStandStillTimer();
+            }
+        }
+    }
+
+    private void disAbleActivityRecognition() {
+        //Filter the Intent and register broadcast receiver
+        unregisterReceiver(receiver);
+        resetStandStillTimer();
+    }
+
+    private void startStandStillTimer() {
+        timerStarted = true;
+        seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
+            @Override
+            public void onCountDownFinish() {
+                minimumTimeAction();
+            }
+
+            @Override
+            public void seekBarTick(int progress) {
+                setProgressLabel(progress);
+            }
+        });
+        seekBarHandler.startTimer();
+    }
+
+    private void minimumTimeAction() {
+        progressView.setText("");
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
+        setupLocationHelper();
+    }
+
+    private void resetStandStillTimer() {
+        progressView.setText("");
+        timerStarted = false;
+        seekBarHandler.resetTimer();
     }
 
     private void setProgressLabel(int progress) {
