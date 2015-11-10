@@ -77,7 +77,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        trackerTimeSetting = new TrackerTimeSetting(this);
+        trackerTimeSetting = new TrackerTimeSetting();
 
         setupViewProperties();
         setupGifImage();

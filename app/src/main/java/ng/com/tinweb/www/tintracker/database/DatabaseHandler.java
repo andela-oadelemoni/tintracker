@@ -76,28 +76,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close(); // Closing database connection
     }
 
-    // Getting single location
-    public LocationData getLocation(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_LOCATIONS, new String[]{KEY_ID, KEY_ADDRESS,
-                        KEY_LAT, KEY_LONG, KEY_DATE, KEY_TIME}, KEY_ID + "=?",
-                new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        LocationData locationData = new LocationData();
-        locationData.setID(Integer.parseInt(cursor.getString(0)));
-        locationData.setAddress(cursor.getString(1));
-        locationData.setLatitude(cursor.getString(2));
-        locationData.setLongitude(cursor.getString(3));
-        locationData.setDate(cursor.getString(4));
-        locationData.setTime(cursor.getString(5));
-
-        // return location data
-        return locationData;
-    }
-
     // Getting All locations
     public List<LocationData> getAllLocations() {
         List<LocationData> locationList = new ArrayList<>();
@@ -124,42 +102,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // return contact list
         return locationList;
-    }
-
-    // Getting locations Count
-    public int getLocationsCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_LOCATIONS;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-
-        // return count
-        return cursor.getCount();
-    }
-
-    // Updating single location
-    public int updateLocation(LocationData locationData) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_ADDRESS, locationData.getAddress());
-        values.put(KEY_LAT, locationData.getLatitude());
-        values.put(KEY_LONG, locationData.getLongitude());
-        values.put(KEY_DATE, locationData.getDate());
-        values.put(KEY_TIME, locationData.getTime());
-
-        // updating row
-        return db.update(TABLE_LOCATIONS, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(locationData.getID())});
-
-    }
-
-    // Deleting single location
-    public void deleteLocation(LocationData locationData) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_LOCATIONS, KEY_ID + " = ?",
-                new String[]{String.valueOf(locationData.getID())});
-        db.close();
     }
 
     public List<LocationData> getLocationsByGroup() {
