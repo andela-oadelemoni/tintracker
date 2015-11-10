@@ -212,7 +212,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 }
             });
         } else {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.location_permission_denial_message, Toast.LENGTH_LONG).show();
             requestLocationPermission();
         }
     }
@@ -222,7 +222,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-            Toast.makeText(this, "Location Permission needed to save current location", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.permission_request_explanation, Toast.LENGTH_LONG).show();
             // Show an expanation to the user *asynchronously* -- don't block
             // this thread waiting for the user's response! After the user
             // sees the explanation, try again to request the permission.
@@ -253,7 +253,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                     // contacts-related task you need to do.
                     setupLocationHelper();
                 } else {
-                    Toast.makeText(this, "Oops! Location Request Denied", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.location_request_error, Toast.LENGTH_LONG).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -320,15 +320,15 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                String activity = intent.getStringExtra("activity");
-                int confidence = intent.getExtras().getInt("confidence");
+                String activity = intent.getStringExtra(getString(R.string.activity_recognition_activity_name));
+                int confidence = intent.getExtras().getInt(getString(R.string.activity_recognition_confidence_level));
 
                 setActivityRecognitionAction(activity, confidence);
             }
         };
         //Filter the Intent and register broadcast receiver
         IntentFilter filter = new IntentFilter();
-        filter.addAction("ImActive");
+        filter.addAction(getString(R.string.activity_recognition_intent_filter));
         registerReceiver(receiver, filter);
 
         new TinTrackerActivityRecognition();
@@ -336,7 +336,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void setActivityRecognitionAction(String activity, int confidence) {
         if (confidence > 50) {
-            if (activity.equals("Not Moving")) {
+            if (activity.equals(getString(R.string.still_notification))) {
                 gifFromResource.stop();
                 if (!timerStarted) startStandStillTimer();
             } else {
