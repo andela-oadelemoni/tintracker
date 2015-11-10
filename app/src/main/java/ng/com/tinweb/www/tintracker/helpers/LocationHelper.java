@@ -3,8 +3,6 @@ package ng.com.tinweb.www.tintracker.helpers;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -49,22 +47,17 @@ public class LocationHelper implements GoogleApiClient.OnConnectionFailedListene
         googleClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
             @Override
             public void onConnected(Bundle bundle) {
-                Toast.makeText(context, "Listener is called now", Toast.LENGTH_LONG).show();
                 location = LocationServices.FusedLocationApi.getLastLocation(
                         googleClient);
                 if (location != null) {
-                    Toast.makeText(context, "Lat: " + location.getLatitude() + "\nLong: " + location.getLongitude(), Toast.LENGTH_LONG).show();
                     callback.onSuccess(location);
                 } else {
-                    Toast.makeText(context, "Location is null", Toast.LENGTH_LONG).show();
                     getLocationFromUpdate(callback);
                 }
             }
 
             @Override
-            public void onConnectionSuspended(int i) {
-                Toast.makeText(context, "Connection suspended", Toast.LENGTH_LONG).show();
-            }
+            public void onConnectionSuspended(int i) {}
         });
     }
 
@@ -72,7 +65,6 @@ public class LocationHelper implements GoogleApiClient.OnConnectionFailedListene
         LocationServices.FusedLocationApi.requestLocationUpdates(googleClient, locationRequest, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.i("From Request", "location object called");
                 LocationHelper.this.location = location;
                 callback.onSuccess(LocationHelper.this.location);
                 LocationServices.FusedLocationApi.removeLocationUpdates(googleClient, this);
@@ -81,9 +73,7 @@ public class LocationHelper implements GoogleApiClient.OnConnectionFailedListene
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(context, "Connection failed", Toast.LENGTH_LONG).show();
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 
     public interface LocationHelperCallback {
         void onSuccess(Location location);
