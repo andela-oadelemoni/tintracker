@@ -28,7 +28,7 @@ public class DatabaseHandlerTest extends AndroidTestCase {
     private void setupLocationData() {
         locationData = new LocationData();
         locationData.setID(1);
-        locationData.setOccurence(1);
+        locationData.setOccurrence(1);
         locationData.setAddress("2, Address St.");
         locationData.setDate("23-12-1989");
         locationData.setLatitude("3.2353");
@@ -53,7 +53,7 @@ public class DatabaseHandlerTest extends AndroidTestCase {
         assertEquals("Location listing error", 2, locations2.size());
 
         List<LocationData> locationByGroup = db.getLocationsByGroup();
-        assertEquals("Location listing by group error", 2, locationByGroup.get(0).getOccurence());
+        assertEquals("Location listing by group error", 2, locationByGroup.get(0).getOccurrence());
     }
 
 }
