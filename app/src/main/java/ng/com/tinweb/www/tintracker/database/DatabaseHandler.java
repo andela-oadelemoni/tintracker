@@ -123,7 +123,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 locationData.setLongitude(cursor.getString(3));
                 locationData.setDate(cursor.getString(4));
                 locationData.setTime(cursor.getString(5));
-                locationData.setOccurence(cursor.getInt(6)); // for column count result
+                locationData.setOccurrence(cursor.getInt(6)); // for column count result
                 // Adding contact to list
                 locationList.add(locationData);
             } while (cursor.moveToNext());

@@ -78,7 +78,7 @@ public class LocationHistoryAdapter extends RecyclerView.Adapter<LocationHistory
         if (!isByLocation) LocationViewHolder.time.setText(time);
         else {
             LocationViewHolder.time.setHeight(0);
-            LocationViewHolder.occurrence.setText(String.valueOf(location.getOccurence()));
+            LocationViewHolder.occurrence.setText(String.valueOf(location.getOccurrence()));
         }
 
         checkForNewDate(date, i);

@@ -24,7 +24,7 @@ public class LocationHistoryAdaperTest extends InstrumentationTestCase {
     private void setupLocationData() {
         locationData = new LocationData();
         locationData.setID(1);
-        locationData.setOccurence(1);
+        locationData.setOccurrence(1);
         locationData.setAddress("2, Address St.");
         locationData.setDate("23-12-1989");
         locationData.setLatitude("3.2353");
