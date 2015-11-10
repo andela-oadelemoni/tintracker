@@ -2,10 +2,11 @@ package ng.com.tinweb.www.tintracker.data;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+
+import ng.com.tinweb.www.tintracker.R;
 
 /**
  * Created by kamiye on 11/4/15.
@@ -35,18 +36,13 @@ public class ActivityRecognitionService extends IntentService {
             String mostProbableName = getActivityName(detectedActivity.getType());
 
             //Fire the intent with activity name & confidence
-            Intent broadCastIntent = new Intent("ImActive");
-            broadCastIntent.putExtra("activity", mostProbableName);
-            broadCastIntent.putExtra("confidence", confidence);
-
-            Log.d(TAG, "Most Probable Name : " + mostProbableName);
-            Log.d(TAG, "Confidence : " + confidence);
+            Intent broadCastIntent = new Intent(getString(R.string.activity_recognition_intent_filter));
+            broadCastIntent.putExtra(getString(R.string.activity_recognition_activity_name), mostProbableName);
+            broadCastIntent.putExtra(getString(R.string.activity_recognition_confidence_level), confidence);
 
             //Send Broadcast to be listen in MainActivity
             this.sendBroadcast(broadCastIntent);
 
-        }else {
-            Log.d(TAG, "Intent had no data returned");
         }
     }
 
@@ -59,12 +55,12 @@ public class ActivityRecognitionService extends IntentService {
             case DetectedActivity.ON_FOOT:
             case DetectedActivity.WALKING:
             case DetectedActivity.RUNNING:
-                return "Moving";
+                return getString(R.string.movement_notification);
             case DetectedActivity.STILL:
             case DetectedActivity.TILTING:
             case DetectedActivity.UNKNOWN:
-                return "Not Moving";
+                return getString(R.string.still_notification);
         }
-        return "N/A";
+        return getString(R.string.n_a);
     }
 }

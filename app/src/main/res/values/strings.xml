@@ -40,4 +40,15 @@
         \n\n<i>For bugs and issues, contact application developer (Oluwakamiye) on oluwakamiye.adelemoni@andela.com.</i>
     </string>
     <string name="info_title">Application Info</string>
+    <string name="still_notification">Not Moving</string>
+    <string name="movement_notification">Moving</string>
+    <string name="activity_recognition_intent_filter">ImActive</string>
+    <string name="activity_recognition_activity_name">activity</string>
+    <string name="activity_recognition_confidence_level">confidence</string>
+    <string name="n_a">N/A</string>
+    <string name="location_request_error">Oops! Location Request Denied</string>
+    <string name="permission_request_explanation">Location Permission needed to save current location</string>
+    <string name="location_permission_denial_message">Location permission not granted</string>
+    <string name="date_fragment_indicator">By Date</string>
+    <string name="location_fragment_indicator">By Location</string>
 </resources>

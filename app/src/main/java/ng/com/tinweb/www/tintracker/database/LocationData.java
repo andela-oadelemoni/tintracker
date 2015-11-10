@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -35,7 +34,7 @@ public class LocationData implements AddressResultReceiver.Receiver {
     private String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
     private String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
     private String address;
-    private int occurence;
+    private int occurrence;
 
     public LocationData() {}
 
@@ -86,9 +85,9 @@ public class LocationData implements AddressResultReceiver.Receiver {
         this.time = time;
     }
 
-    // set occurence
-    public void setOccurence(int i) {
-        this.occurence = i;
+    // set occurrence
+    public void setOccurrence(int i) {
+        this.occurrence = i;
     }
 
     // getting ID
@@ -121,9 +120,9 @@ public class LocationData implements AddressResultReceiver.Receiver {
         return this.address;
     }
 
-    // get occurence
-    public int getOccurence() {
-        return this.occurence;
+    // get occurrence
+    public int getOccurrence() {
+        return this.occurrence;
     }
 
     protected void startAddressLookup() {
@@ -137,8 +136,6 @@ public class LocationData implements AddressResultReceiver.Receiver {
     public void onReceiveResult(int resultCode, Bundle resultData) {
         String mAddressOutput = resultData.getString(AddressLookup.Constants.RESULT_DATA_KEY);
 
-        Toast.makeText(context, "Address: " + mAddressOutput, Toast.LENGTH_LONG).show();
-
         // Show a toast message if an address was found.
         if (resultCode == AddressLookup.Constants.SUCCESS_RESULT) {
             Toast.makeText(context, R.string.address_found, Toast.LENGTH_LONG).show();
@@ -149,24 +146,11 @@ public class LocationData implements AddressResultReceiver.Receiver {
 
     private void saveLocationData() {
         DatabaseHandler database = new DatabaseHandler(context);
-        // Inserting Contacts
-        Log.i("Insert: ", "Inserting ..");
         database.addLocation(this);
-
-        // Reading all contacts
-        Log.i("Reading: ", "Reading all contacts..");
-        List<LocationData> locations = database.getAllLocations();
-
-        for (LocationData cn : locations) {
-            String log = "Id: " + cn.getID() + " ,Lat: " + cn.getLatitude() + " ,Long: " + cn.getLongitude()+ " ,Address: " + cn.getAddress();
-            // Writing Contacts to log
-            Log.i("Name: ", log);
-        }
     }
 
     public List<LocationData> getLocations() {
         DatabaseHandler database = new DatabaseHandler(context);
-
         return database.getAllLocations();
     }
 
