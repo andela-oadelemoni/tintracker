@@ -1,5 +1,6 @@
 package ng.com.tinweb.www.tintracker.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTabHost;
@@ -21,14 +22,16 @@ public class LocationHistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Context context = getActivity();
+
         View rootView = inflater.inflate(R.layout.fragment_history, container, false);
 
         fragmentTabHost = (FragmentTabHost) rootView.findViewById(R.id.tabhost);
         fragmentTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
 
-        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("date").setIndicator("By Date"),
+        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("date").setIndicator(context.getString(R.string.date_fragment_indicator)),
                 DateFragment.class, null);
-        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("location").setIndicator("By Location"),
+        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("location").setIndicator(context.getString(R.string.location_fragment_indicator)),
                 LocationFragment.class, null);
 
         TabWidget tabWidget = fragmentTabHost.getTabWidget();

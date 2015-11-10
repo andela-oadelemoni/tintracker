@@ -44,7 +44,7 @@ public class SeekBarHandler {
 
     public void resetTimer() {
         seekBar.setProgress(0);
-        seekBarTimer.cancel();
+        if (seekBarTimer != null) seekBarTimer.cancel();
     }
 
     public interface SeekBarHandlerCallBack {

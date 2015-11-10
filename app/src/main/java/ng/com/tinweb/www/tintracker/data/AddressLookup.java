@@ -81,17 +81,12 @@ public class AddressLookup extends IntentService {
         } catch (IllegalArgumentException illegalArgumentException) {
             // Catch invalid latitude or longitude values.
             errorMessage = getString(R.string.invalid_lat_long_used);
-            Log.e(TAG, errorMessage + ". " +
-                    "Latitude = " + location.getLatitude() +
-                    ", Longitude = " +
-                    location.getLongitude(), illegalArgumentException);
         }
 
         // Handle case where no address was found.
         if (addresses == null || addresses.size() == 0) {
             if (errorMessage.isEmpty()) {
                 errorMessage = getString(R.string.no_address_found);
-                Log.e(TAG, errorMessage);
             }
             deliverResultToReceiver(Constants.FAILURE_RESULT, errorMessage);
         } else {
@@ -111,8 +106,6 @@ public class AddressLookup extends IntentService {
 
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();
-        Log.i("Full Address:", message);
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         bundle.putString(Constants.RESULT_DATA_KEY, message);
         mReceiver.send(resultCode, bundle);
     }

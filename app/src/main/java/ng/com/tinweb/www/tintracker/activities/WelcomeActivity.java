@@ -63,11 +63,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private GifDrawable gifFromResource;
     private GifImageView gifImage;
 
-    // Location object
-    private LocationHelper locationHelper;
-
     private SeekBarHandler seekBarHandler;
     private boolean timerStarted = false;
+
+    // fragments
     private LocationHistoryFragment historyFragment;
     private InfoFragment infoFragment;
 
@@ -78,7 +77,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        trackerTimeSetting = new TrackerTimeSetting(this);
+        trackerTimeSetting = new TrackerTimeSetting();
 
         setupViewProperties();
         setupGifImage();
@@ -87,150 +86,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
         setupFragments();
-    }
-
-    private void setupFragments() {
-        historyFragment = new LocationHistoryFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.history_fragment_container, historyFragment)
-                .detach(historyFragment)
-                .commit();
-        infoFragment = new InfoFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.info_fragment_container, infoFragment)
-                .detach(infoFragment)
-                .commit();
-    }
-
-    private void setupActivityRecognition() {
-        //Broadcast receiver
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String activity = intent.getStringExtra("activity");
-                int confidence = intent.getExtras().getInt("confidence");
-
-                setActivityRecognitionAction(activity, confidence);
-            }
-        };
-        //Filter the Intent and register broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ImActive");
-        registerReceiver(receiver, filter);
-
-        new TinTrackerActivityRecognition();
-    }
-
-    private void disAbleActivityRecognition() {
-        //Filter the Intent and register broadcast receiver
-        unregisterReceiver(receiver);
-        resetStandStillTimer();
-    }
-
-    private void setActivityRecognitionAction(String activity, int confidence) {
-        if (confidence > 50) {
-            if (activity.equals("Not Moving")) {
-                gifFromResource.stop();
-                if (!timerStarted) startStandStillTimer();
-            } else {
-                gifFromResource.start();
-                resetStandStillTimer();
-            }
-        }
-    }
-
-    private void startStandStillTimer() {
-        timerStarted = true;
-        seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
-            @Override
-            public void onCountDownFinish() {
-                // TODO something here
-                minimumTimeAction();
-            }
-
-            @Override
-            public void seekBarTick(int progress) {
-                setProgressLabel(progress);
-            }
-        });
-        seekBarHandler.startTimer();
-    }
-
-    private void minimumTimeAction() {
-        progressView.setText("");
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(500);
-        setupLocationHelper();
-    }
-
-    private void resetStandStillTimer() {
-        progressView.setText("");
-        timerStarted = false;
-        seekBarHandler.resetTimer();
-    }
-
-    private void setupLocationHelper() {
-        locationHelper = new LocationHelper();
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
-                @Override
-                public void onSuccess(Location location) {
-                    new LocationData(location);
-                }
-            });
-        } else {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_LONG).show();
-            requestLocationPermission();
-        }
-    }
-
-    private void requestLocationPermission() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-            Toast.makeText(this, "Location Permission needed to save current location", Toast.LENGTH_LONG).show();
-            // Show an expanation to the user *asynchronously* -- don't block
-            // this thread waiting for the user's response! After the user
-            // sees the explanation, try again to request the permission.
-
-        } else {
-
-            // No explanation needed, we can request the permission.
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_CODE);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    setupLocationHelper();
-                } else {
-                    Toast.makeText(this, "Oops! Location Request Denied", Toast.LENGTH_LONG).show();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
     }
 
     private void setupViewProperties() {
@@ -264,6 +119,25 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    private void setupSettingBar() {
+        seekBarTimeSetting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                timeSetting = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (timeSetting < 10) timeSetting = timeSetting + 1;
+                updateTimeSetting(timeSetting);
+            }
+        });
+    }
+
     private void setUpTrackingTime() {
         int timeSetting = trackerTimeSetting.getTimeSetting();
         seekbarSteps = timeSetting * 60;
@@ -273,6 +147,30 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         String display = timeSetting + ":00";
         timeLimit.setText(display);
         if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
+    }
+
+    private void setupFragments() {
+        historyFragment = new LocationHistoryFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.history_fragment_container, historyFragment)
+                .detach(historyFragment)
+                .commit();
+        infoFragment = new InfoFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.info_fragment_container, infoFragment)
+                .detach(infoFragment)
+                .commit();
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+
+        switch (id) {
+            case R.id.action_button:
+                trackingButtonAction();
+                break;
+        }
     }
 
     @Override
@@ -303,14 +201,86 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         return super.onOptionsItemSelected(item);
     }
 
+    private void setupLocationHelper() {
+        LocationHelper locationHelper = new LocationHelper();
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            locationHelper.getLocation(new LocationHelper.LocationHelperCallback() {
+                @Override
+                public void onSuccess(Location location) {
+                    new LocationData(location);
+                }
+            });
+        } else {
+            Toast.makeText(this, R.string.location_permission_denial_message, Toast.LENGTH_LONG).show();
+            requestLocationPermission();
+        }
+    }
+
+    private void requestLocationPermission() {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            Toast.makeText(this, R.string.permission_request_explanation, Toast.LENGTH_LONG).show();
+            // Show an expanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        } else {
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_CODE);
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setupLocationHelper();
+                } else {
+                    Toast.makeText(this, R.string.location_request_error, Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
     private void toggleAppInfo() {
         detachExistingFragment(historyFragment);
-        if (infoFragment.isAdded()) {
+        toggleFragment(infoFragment);
+    }
+
+    private void toggleHistory() {
+        detachExistingFragment(infoFragment);
+        toggleFragment(historyFragment);
+    }
+
+    private void toggleFragment(Fragment fragment) {
+        if (fragment.isAdded()) {
             getSupportFragmentManager().beginTransaction()
-                    .detach(infoFragment).commit();
+                    .detach(fragment).commit();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .attach(infoFragment).commit();
+                    .attach(fragment).commit();
         }
     }
 
@@ -319,51 +289,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 .detach(fragment).commit();
     }
 
-    private void setupSettingBar() {
-        seekBarTimeSetting.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                timeSetting = progress;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (timeSetting < 10) timeSetting = timeSetting + 1;
-                updateTimeSetting(timeSetting);
-            }
-        });
-    }
-
     private void updateTimeSetting(int time) {
         trackerTimeSetting.saveTimeSetting(time);
         Toast.makeText(WelcomeActivity.this, "Tracking time changed to: " + timeSetting + " minute(s)", Toast.LENGTH_LONG).show();
         setUpTrackingTime();
-    }
-
-    private void toggleHistory() {
-        detachExistingFragment(infoFragment);
-        if (historyFragment.isAdded()) {
-            getSupportFragmentManager().beginTransaction()
-                    .detach(historyFragment).commit();
-        } else {
-            getSupportFragmentManager().beginTransaction()
-                    .attach(historyFragment).commit();
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-
-        switch (id) {
-            case R.id.action_button:
-                trackingButtonAction();
-                break;
-        }
     }
 
     private void trackingButtonAction() {
@@ -383,6 +312,73 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         buttonUp = !buttonUp;
         AppViewAnimation.toggleViewAnimation(gifImage);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
+    }
+
+    private void setupActivityRecognition() {
+        //Broadcast receiver
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String activity = intent.getStringExtra(getString(R.string.activity_recognition_activity_name));
+                int confidence = intent.getExtras().getInt(getString(R.string.activity_recognition_confidence_level));
+
+                setActivityRecognitionAction(activity, confidence);
+            }
+        };
+        //Filter the Intent and register broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.activity_recognition_intent_filter));
+        registerReceiver(receiver, filter);
+
+        new TinTrackerActivityRecognition();
+    }
+
+    private void setActivityRecognitionAction(String activity, int confidence) {
+        if (confidence > 50) {
+            if (activity.equals(getString(R.string.still_notification))) {
+                gifFromResource.stop();
+                if (!timerStarted) startStandStillTimer();
+            } else {
+                gifFromResource.start();
+                resetStandStillTimer();
+            }
+        }
+    }
+
+    private void disAbleActivityRecognition() {
+        //Filter the Intent and register broadcast receiver
+        unregisterReceiver(receiver);
+        resetStandStillTimer();
+    }
+
+    private void startStandStillTimer() {
+        timerStarted = true;
+        seekBarHandler.setTimer(new SeekBarHandler.SeekBarHandlerCallBack() {
+            @Override
+            public void onCountDownFinish() {
+                minimumTimeAction();
+            }
+
+            @Override
+            public void seekBarTick(int progress) {
+                setProgressLabel(progress);
+            }
+        });
+        seekBarHandler.startTimer();
+    }
+
+    private void minimumTimeAction() {
+        progressView.setText("");
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
+        setupLocationHelper();
+    }
+
+    private void resetStandStillTimer() {
+        progressView.setText("");
+        timerStarted = false;
+        seekBarHandler.resetTimer();
     }
 
     private void setProgressLabel(int progress) {
