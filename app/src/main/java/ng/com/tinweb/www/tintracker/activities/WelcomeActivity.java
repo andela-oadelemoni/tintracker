@@ -30,8 +30,8 @@ import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.database.LocationData;
-import ng.com.tinweb.www.tintracker.fragment.InfoFragment;
 import ng.com.tinweb.www.tintracker.fragment.LocationHistoryFragment;
+import ng.com.tinweb.www.tintracker.helpers.AppAlertDialog;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
 import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
@@ -43,6 +43,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private static final int MY_PERMISSIONS_REQUEST_CODE = 1;
     // Layout container
     private RelativeLayout container;
+    private LinearLayout timeSettingLayout;
     private BroadcastReceiver receiver;
 
     // Button
@@ -68,7 +69,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     // fragments
     private LocationHistoryFragment historyFragment;
-    private InfoFragment infoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,13 +85,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setUpTrackingTime();
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
-        setupFragments();
+        setupFragment();
     }
 
     private void setupViewProperties() {
 
         // View Group
         container = (RelativeLayout) findViewById(R.id.container);
+        timeSettingLayout = (LinearLayout) findViewById(R.id.time_setting);
         gifImage = (GifImageView) findViewById(R.id.gif_image);
 
         // TextView
@@ -107,6 +108,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         action_button = (Button) findViewById(R.id.action_button);
         actionButtonParams = (RelativeLayout.LayoutParams) action_button.getLayoutParams();
         action_button.setOnClickListener(this);
+
+        // Clear screen buttons
+        TextView okText = (TextView) findViewById(R.id.ok);
+        okText.setOnClickListener(this);
     }
 
     private void setupGifImage() {
@@ -149,16 +154,11 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         if (seekBarHandler != null) seekBarHandler.setSteps(seekbarSteps);
     }
 
-    private void setupFragments() {
+    private void setupFragment() {
         historyFragment = new LocationHistoryFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.history_fragment_container, historyFragment)
                 .detach(historyFragment)
-                .commit();
-        infoFragment = new InfoFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.info_fragment_container, infoFragment)
-                .detach(infoFragment)
                 .commit();
     }
 
@@ -169,6 +169,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         switch (id) {
             case R.id.action_button:
                 trackingButtonAction();
+                break;
+            case R.id.ok:
+                clearLayoutScreen();
                 break;
         }
     }
@@ -182,23 +185,43 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
-                LinearLayout timeSetting = (LinearLayout) findViewById(R.id.time_setting);
-                AppViewAnimation.toggleViewAnimation(timeSetting);
+                toggleTimeSetting();
                 break;
             case R.id.action_history:
                 toggleHistory();
                 break;
             case R.id.action_info:
-                toggleAppInfo();
+                AppAlertDialog alertDialog = new AppAlertDialog(this);
+                alertDialog.showApplicationInfo();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleTimeSetting() {
+        if (buttonUp) {
+            AppAlertDialog alertDialog = new AppAlertDialog(this);
+            alertDialog.settingsError();
+        }
+        else {
+            clearLayoutFragment();
+            AppViewAnimation.toggleViewAnimation(timeSettingLayout);
+        }
+    }
+
+    private void clearLayoutScreen() {
+        clearLayoutFragment();
+        AppViewAnimation.fadeOut(timeSettingLayout);
+    }
+
+    private void clearLayoutFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .detach(historyFragment)
+                .commit();
     }
 
     private void setupLocationHelper() {
@@ -221,23 +244,11 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
-
             Toast.makeText(this, R.string.permission_request_explanation, Toast.LENGTH_LONG).show();
-            // Show an expanation to the user *asynchronously* -- don't block
-            // this thread waiting for the user's response! After the user
-            // sees the explanation, try again to request the permission.
-
         } else {
-
-            // No explanation needed, we can request the permission.
-
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_CODE);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
         }
     }
 
@@ -248,29 +259,15 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
                     setupLocationHelper();
                 } else {
                     Toast.makeText(this, R.string.location_request_error, Toast.LENGTH_LONG).show();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
                 }
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
-    private void toggleAppInfo() {
-        detachExistingFragment(historyFragment);
-        toggleFragment(infoFragment);
-    }
-
     private void toggleHistory() {
-        detachExistingFragment(infoFragment);
         toggleFragment(historyFragment);
     }
 
@@ -282,11 +279,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             getSupportFragmentManager().beginTransaction()
                     .attach(fragment).commit();
         }
-    }
-
-    private void detachExistingFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .detach(fragment).commit();
+        AppViewAnimation.fadeOut(timeSettingLayout);
     }
 
     private void updateTimeSetting(int time) {
@@ -311,6 +304,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         buttonUp = !buttonUp;
         AppViewAnimation.toggleViewAnimation(gifImage);
+        AppViewAnimation.fadeOut(timeSettingLayout);
         AppViewAnimation.setViewTransition(actionButtonParams, container, action_button);
     }
 
@@ -369,31 +363,23 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void minimumTimeAction() {
-        progressView.setText("");
+        progressView.setText(getString(R.string.tracking_start_time));
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(500);
         setupLocationHelper();
     }
 
     private void resetStandStillTimer() {
-        progressView.setText("");
+        progressView.setText(getString(R.string.tracking_start_time));
         timerStarted = false;
         seekBarHandler.resetTimer();
     }
 
     private void setProgressLabel(int progress) {
-
-        int left = timeBar.getLeft() + timeBar.getPaddingLeft();
-        int right = timeBar.getRight() - timeBar.getPaddingRight();
-
-        int seek_label_pos = (((right - left) * progress) / seekbarSteps) + left;
-        progressView.setX(seek_label_pos - progressView.getWidth() / 2);
-
         int mins = progress / 60;
         int secs = progress % 60;
 
         String progressDisplay = (secs < 10) ? mins + ":0" + secs : mins + ":" + secs;
-
         progressView.setText(progressDisplay);
     }
 

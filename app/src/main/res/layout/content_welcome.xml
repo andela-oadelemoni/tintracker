@@ -82,6 +82,15 @@
             android:max="9"
             android:progress="2" />
 
+        <TextView
+            android:id="@+id/ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ok"
+            android:textSize="18sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"/>
+
     </LinearLayout>
 
     <RelativeLayout
@@ -121,14 +130,6 @@
         android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/progress_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="@color/bright_grey"
-            android:textSize="24sp" />
-
         <SeekBar
             android:id="@+id/timebar"
             android:layout_width="match_parent"
@@ -142,6 +143,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/progress_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"

@@ -15,7 +15,6 @@ import android.widget.TextView;
 import java.util.List;
 
 import ng.com.tinweb.www.tintracker.activities.WelcomeActivity;
-import ng.com.tinweb.www.tintracker.fragment.InfoFragment;
 import ng.com.tinweb.www.tintracker.fragment.LocationHistoryFragment;
 import pl.droidsonroids.gif.GifImageView;
 
@@ -116,31 +115,6 @@ public class WelcomeActivityTest extends ActivityInstrumentationTestCase2<Welcom
         List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
         for(Fragment frag: fragments) {
             if (frag instanceof LocationHistoryFragment && frag.isAdded()) {
-                count++;
-            }
-        }
-        assertTrue(count == 0);
-    }
-
-    public void testInfo_FragmentAdded() {
-        int count = 0;
-        touchAction(infoItem);
-        List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
-        for(Fragment frag: fragments) {
-            if (frag instanceof InfoFragment && frag.isAdded()) {
-                count++;
-            }
-        }
-        assertTrue(count == 1);
-    }
-
-    public void testInfo_FragmentDetached() {
-        int count = 0;
-        touchAction(infoItem);
-        touchAction(infoItem);
-        List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
-        for(Fragment frag: fragments) {
-            if (frag instanceof InfoFragment && frag.isAdded()) {
                 count++;
             }
         }
