@@ -36,7 +36,7 @@
         \'Start Tracking\' button.
         \n\nWhen you\'re at a stationary position for the minimum time set, your location is recorded (allow application to
         access your location if necessary).
-        \n\nYou can check the log of places you\'ve spend most time by tapping on the history icon.
+        \n\nYou can check the log of places you\'ve spend most time by tapping the history icon.
         \n\n<i>For bugs and issues, contact application developer (Oluwakamiye) on oluwakamiye.adelemoni@andela.com.</i>
     </string>
     <string name="info_title">Application Info</string>
@@ -51,4 +51,7 @@
     <string name="location_permission_denial_message">Location permission not granted</string>
     <string name="date_fragment_indicator">By Date</string>
     <string name="location_fragment_indicator">By Location</string>
+    <string name="settings_error">You cannot change stand still time while tracking!</string>
+    <string name="ok">OK</string>
+    <string name="error_title">Oops!</string>
 </resources>
