@@ -40,4 +40,9 @@ public class AppViewAnimation {
             view.setLayoutParams(params);
         }
     }
+
+    public static void fadeOut(View view) {
+        if (view.getVisibility() == View.VISIBLE)
+            toggleViewAnimation(view);
+    }
 }
