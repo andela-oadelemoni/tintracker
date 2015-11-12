@@ -3,8 +3,6 @@ package ng.com.tinweb.www.tintracker.activities;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,13 +26,13 @@ import java.io.IOException;
 
 import ng.com.tinweb.www.tintracker.R;
 import ng.com.tinweb.www.tintracker.animation.AppViewAnimation;
+import ng.com.tinweb.www.tintracker.data.ActivityRecognitionReceiver;
 import ng.com.tinweb.www.tintracker.data.TrackerTimeSetting;
 import ng.com.tinweb.www.tintracker.database.LocationData;
 import ng.com.tinweb.www.tintracker.fragment.LocationHistoryFragment;
 import ng.com.tinweb.www.tintracker.helpers.AppAlertDialog;
 import ng.com.tinweb.www.tintracker.helpers.LocationHelper;
 import ng.com.tinweb.www.tintracker.helpers.SeekBarHandler;
-import ng.com.tinweb.www.tintracker.helpers.TinTrackerActivityRecognition;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
@@ -45,6 +43,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private RelativeLayout container;
     private LinearLayout timeSettingLayout;
     private BroadcastReceiver receiver;
+    private ActivityRecognitionReceiver activityReceiver;
 
     // Button
     private boolean buttonUp = false;
@@ -86,6 +85,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         seekBarHandler = new SeekBarHandler(timeBar, seekbarSteps);
         setupFragment();
+        activityReceiver = new ActivityRecognitionReceiver();
     }
 
     private void setupViewProperties() {
@@ -309,41 +309,28 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void setupActivityRecognition() {
-        //Broadcast receiver
-        receiver = new BroadcastReceiver() {
+        activityReceiver.setupActivityRecognition(new ActivityRecognitionReceiver.ActivityRecognitionCallback() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String activity = intent.getStringExtra(getString(R.string.activity_recognition_activity_name));
-                int confidence = intent.getExtras().getInt(getString(R.string.activity_recognition_confidence_level));
-
-                setActivityRecognitionAction(activity, confidence);
-            }
-        };
-        //Filter the Intent and register broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(getString(R.string.activity_recognition_intent_filter));
-        registerReceiver(receiver, filter);
-
-        new TinTrackerActivityRecognition();
-    }
-
-    private void setActivityRecognitionAction(String activity, int confidence) {
-        if (confidence > 50) {
-            if (activity.equals(getString(R.string.still_notification))) {
+            public void onStandStillDetected() {
                 gifFromResource.stop();
                 if (!timerStarted) startStandStillTimer();
-            } else {
+            }
+
+            @Override
+            public void onMovementDetected() {
                 gifFromResource.start();
                 resetStandStillTimer();
             }
-        }
+        });
     }
 
     private void disAbleActivityRecognition() {
-        //Filter the Intent and register broadcast receiver
-        unregisterReceiver(receiver);
-        resetStandStillTimer();
+        activityReceiver.disAbleActivityRecognition(new ActivityRecognitionReceiver.ActivityRecognitionDisabledCallback() {
+            @Override
+            public void onActivityRecognitionDisabled() {
+                resetStandStillTimer();
+            }
+        });
     }
 
     private void startStandStillTimer() {
