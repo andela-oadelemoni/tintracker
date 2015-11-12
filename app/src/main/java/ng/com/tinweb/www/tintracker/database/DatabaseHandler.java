@@ -78,38 +78,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Getting All locations
     public List<LocationData> getAllLocations() {
-        List<LocationData> locationList = new ArrayList<>();
+
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_LOCATIONS;
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
-                LocationData locationData = new LocationData();
-                locationData.setID(Integer.parseInt(cursor.getString(0)));
-                locationData.setAddress(cursor.getString(1));
-                locationData.setLatitude(cursor.getString(2));
-                locationData.setLongitude(cursor.getString(3));
-                locationData.setDate(cursor.getString(4));
-                locationData.setTime(cursor.getString(5));
-                // Adding contact to list
-                locationList.add(locationData);
-            } while (cursor.moveToNext());
-        }
-
         // return contact list
-        return locationList;
+        return generateLocationList(selectQuery, false);
     }
 
     public List<LocationData> getLocationsByGroup() {
-        List<LocationData> locationList = new ArrayList<>();
         // Select All Query
         String selectQuery = "SELECT  *, COUNT(" + KEY_ADDRESS + ") AS address_count FROM " + TABLE_LOCATIONS + " GROUP BY "
                 + KEY_ADDRESS + " ORDER BY address_count DESC";
 
+        // return contact list
+        return generateLocationList(selectQuery, true);
+
+    }
+
+    private List<LocationData> generateLocationList(String selectQuery, boolean isByGroup) {
+        List<LocationData> locationList = new ArrayList<>();
+
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -123,13 +112,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 locationData.setLongitude(cursor.getString(3));
                 locationData.setDate(cursor.getString(4));
                 locationData.setTime(cursor.getString(5));
-                locationData.setOccurrence(cursor.getInt(6)); // for column count result
+                if (isByGroup) locationData.setOccurrence(cursor.getInt(6));
                 // Adding contact to list
                 locationList.add(locationData);
             } while (cursor.moveToNext());
         }
 
-        // return contact list
         return locationList;
     }
 }
