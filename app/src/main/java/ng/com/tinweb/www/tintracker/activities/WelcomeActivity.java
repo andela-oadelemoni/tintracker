@@ -42,7 +42,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     // Layout container
     private RelativeLayout container;
     private LinearLayout timeSettingLayout;
-    private BroadcastReceiver receiver;
     private ActivityRecognitionReceiver activityReceiver;
 
     // Button
